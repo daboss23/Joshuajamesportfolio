@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { ReelLightbox } from "./components/ReelLightbox";
 import { ScrollShowcase } from "./components/ScrollShowcase";
-import { TubesCursor } from "./components/TubesCursor";
+import TubesCursor from "./components/ui/tubes-cursor";
 import { REELS, type Reel } from "./data/reels";
 
 export default function App() {

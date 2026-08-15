@@ -148,9 +148,9 @@ export function ImageStreamHero({
         </div>
       </div>
 
-      {/* Vignette keeps the copy readable over the stream. Kept light and
-          purple-black so the retro grid behind the hero still reads through. */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(5,3,10,0.82)_0%,rgba(5,3,10,0.12)_48%,rgba(5,3,10,0.75)_100%)]" />
+      {/* Vignette keeps the copy readable over the stream. Kept fairly light so
+          the cursor tubes behind the page still read through. */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(5,5,5,0.82)_0%,rgba(5,5,5,0.12)_48%,rgba(5,5,5,0.75)_100%)]" />
 
       {children}
     </div>

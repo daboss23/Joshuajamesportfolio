@@ -26,31 +26,12 @@ body {
   position: relative;
 }
 
-/*
- * The shared backdrop for the hero and the parallax. Sticky so it holds still
- * for the whole showcase, then releases with it.
- */
-.showcase__bg {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  z-index: 0;
-  overflow: hidden;
-}
-
-/*
- * The hero is pulled back up over the screen the backdrop occupies in flow. The
- * offset lives here rather than as a negative margin on the backdrop itself: a
- * sticky element's own margins widen the range it stays stuck over, which would
- * leave the grid hanging a full screen past the showcase and over the About
- * section. The extra height past one screen is how far the hero recedes before
- * the parallax takes over.
- */
+/* The extra height past one screen is how far the hero recedes before the
+   parallax takes over. */
 .showcase__hero {
   position: relative;
   z-index: 1;
   height: 185svh;
-  margin-top: -100svh;
 }
 
 .showcase__pin {
@@ -61,112 +42,6 @@ body {
   will-change: transform, opacity, filter;
 }
 
-/* -------------------------------------------------------------- retro grid */
-
-.retro-grid {
-  overflow: hidden;
-  background: #05030a;
-  --grid-line: 2px;
-  --grid-cell: 90px;
-}
-
-/* Night sky, warming toward the horizon line. */
-.retro-grid__sky {
-  position: absolute;
-  inset: 0 0 45% 0;
-  background: linear-gradient(
-    to bottom,
-    #05030a 0%,
-    color-mix(in srgb, var(--grid-color) 12%, #05030a) 55%,
-    color-mix(in srgb, var(--grid-color) 42%, #05030a) 100%
-  );
-}
-
-.retro-grid__horizon {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 45%;
-  height: 2px;
-  background: var(--grid-color);
-  box-shadow:
-    0 0 12px 2px var(--grid-color),
-    0 0 60px 12px color-mix(in srgb, var(--grid-color) 55%, transparent);
-}
-
-.retro-grid__floor {
-  position: absolute;
-  bottom: 0;
-  /* Overhang past both edges so the plane's corners never enter the frame. */
-  left: -50%;
-  right: -50%;
-  height: 45%;
-  perspective: 260px;
-  perspective-origin: 50% 0%;
-  overflow: hidden;
-}
-
-.retro-grid__plane {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 300%;
-  transform-origin: 50% 0%;
-  transform: rotateX(84deg);
-  background-image:
-    repeating-linear-gradient(
-      to right,
-      var(--grid-color) 0 var(--grid-line),
-      transparent var(--grid-line) var(--grid-cell)
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      var(--grid-color) 0 var(--grid-line),
-      transparent var(--grid-line) var(--grid-cell)
-    );
-  /* Fade the far end out rather than letting the lines alias into moire. */
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 18%, #000 100%);
-  animation: retro-grid-scroll var(--grid-speed, 3s) linear infinite;
-}
-
-.retro-grid--glow .retro-grid__plane {
-  filter: drop-shadow(0 0 6px var(--grid-color));
-}
-
-@keyframes retro-grid-scroll {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 0 var(--grid-cell);
-  }
-}
-
-.retro-grid__scanlines {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgb(0 0 0 / 0.32) 0 1px,
-    transparent 1px 3px
-  );
-  mix-blend-mode: multiply;
-}
-
-.retro-grid__vignette {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    ellipse at 50% 55%,
-    transparent 0%,
-    rgb(5 3 10 / 0.55) 62%,
-    rgb(5 3 10 / 0.92) 100%
-  );
-}
-
 /* ---------------------------------------------------------------- parallax */
 
 .parallax {
@@ -174,8 +49,8 @@ body {
   z-index: 1;
   /* The overflow beyond 100svh is the scroll budget the stage animates over. */
   height: 320svh;
-  /* Transparent on purpose: the showcase's retro grid shows through behind the
-     columns, which is what carries continuity over from the hero. */
+  /* Transparent on purpose, so the cursor tubes behind the page still show
+     through the gaps between columns. */
   background: transparent;
 }
 
@@ -233,9 +108,9 @@ body {
      so a transparent core would put it over the brightest artwork. */
   background: radial-gradient(
     ellipse at center,
-    rgb(5 3 10 / 0.92) 0%,
-    rgb(5 3 10 / 0.62) 55%,
-    rgb(5 3 10 / 0.9) 100%
+    rgb(5 5 5 / 0.92) 0%,
+    rgb(5 5 5 / 0.62) 55%,
+    rgb(5 5 5 / 0.9) 100%
   );
   opacity: var(--veil, 0.6);
 }
@@ -311,19 +186,8 @@ body {
     height: 100%;
   }
 
-  /* The fixed backdrop takes no space in flow, so the offset that compensates
-     for it has to go too, or the hero starts a screen above the page. */
   .showcase__hero {
     height: 100svh;
-    margin-top: 0;
-  }
-
-  /* Fixed shrink-wraps to its contents, and every child is absolute — so it
-     needs both edges pinned or it collapses to zero width. */
-  .showcase__bg {
-    position: fixed;
-    left: 0;
-    right: 0;
   }
 
   *,
