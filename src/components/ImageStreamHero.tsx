@@ -10,8 +10,10 @@ type Props = {
   speed?: number;
 };
 
-/** Slides per lane. Each lane renders the full set, phase-shifted. */
-const LANE_EASE = 1.75;
+const SLIDE_W = 280;   // must match the rendered panel width
+const S_MIN = 0.1;     // scale of a panel as it is born at the centre
+const S_MAX = 1.15;    // scale of a panel as it leaves the frame
+const LN_R = Math.log(S_MAX / S_MIN);
 
 /**
  * A mirrored perspective corridor: covers stream outward from the vanishing
@@ -50,18 +52,23 @@ export function ImageStreamHero({
         const lanes = Math.ceil(count / 2);
 
         const u = (((slot / lanes + progress.current) % 1) + 1) % 1;
-        const eased = Math.pow(u, LANE_EASE);
+        const s = S_MIN * Math.exp(LN_R * u);
 
-        const x = lane * (0.045 + eased * 0.6) * width;
-        const scale = 0.16 + eased * 1.15;
-        const rotate = lane * -(6 + eased * 24);
-        const fade = Math.min(1, u / 0.08) * Math.min(1, (1 - u) / 0.12);
+        // Panels sit shoulder to shoulder, so the gap between two of them has
+        // to grow at the same rate the panels do; the 0.82 pulls the wings in
+        // and lets neighbours overlap slightly so no seams show. A newborn
+        // panel straddles the centre line, which is what joins the two wings.
+        const spread = (SLIDE_W * lanes * 0.82) / LN_R;
+        const k = width / 1440;
+        const x = lane * spread * (s - S_MIN) * k;
+        const rotate = lane * -(4 + u * 20);
+        const fade = Math.min(1, u / 0.02) * Math.min(1, (1 - u) / 0.04);
 
-        node.style.transform = `translate3d(${x}px, 0, 0) rotateY(${rotate}deg) scale(${scale})`;
+        node.style.transform = `translate3d(${x}px, 0, 0) rotateY(${rotate}deg) scale(${s * k})`;
         node.style.opacity = String(fade);
         node.style.zIndex = String(Math.round(u * 100));
         // Only the large, near slides should swallow clicks.
-        node.style.pointerEvents = u > 0.35 && fade > 0.5 ? "auto" : "none";
+        node.style.pointerEvents = u > 0.3 ? "auto" : "none";
       });
     };
 

@@ -7,12 +7,6 @@ type Props = {
   onStep: (delta: number) => void;
 };
 
-/** Pulls the numeric video id out of a public TikTok URL. */
-export function tiktokEmbedSrc(url: string): string | null {
-  const match = url.match(/\/video\/(\d+)/) ?? url.match(/(\d{15,})/);
-  return match ? `https://www.tiktok.com/embed/v2/${match[1]}` : null;
-}
-
 export function ReelLightbox({ reel, onClose, onStep }: Props) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -34,8 +28,6 @@ export function ReelLightbox({ reel, onClose, onStep }: Props) {
   }, [reel, onClose, onStep]);
 
   if (!reel) return null;
-
-  const embed = reel.videoSrc ? null : reel.tiktokUrl ? tiktokEmbedSrc(reel.tiktokUrl) : null;
 
   return (
     <div
@@ -61,18 +53,10 @@ export function ReelLightbox({ reel, onClose, onStep }: Props) {
               loop
               className="h-full w-full object-cover"
             />
-          ) : embed ? (
-            <iframe
-              key={reel.id}
-              src={embed}
-              title={reel.title}
-              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-              className="h-full w-full border-0"
-            />
           ) : (
             <div className="grid h-full place-items-center p-6 text-center text-sm text-mute">
-              No video source set for “{reel.title}”. Add a <code>tiktokUrl</code> or{" "}
-              <code>videoSrc</code> in <code>src/data/reels.ts</code>.
+              No video file set for “{reel.title}”. Add a <code>videoSrc</code> in{" "}
+              <code>src/data/reels.ts</code>.
             </div>
           )}
         </div>
@@ -82,16 +66,6 @@ export function ReelLightbox({ reel, onClose, onStep }: Props) {
             <p className="truncate text-base font-medium text-chalk">{reel.title}</p>
             {reel.client && <p className="text-xs text-mute">{reel.client}</p>}
           </div>
-          {reel.tiktokUrl && (
-            <a
-              href={reel.tiktokUrl}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="shrink-0 rounded-full border border-white/20 px-4 py-2 text-xs text-chalk transition-colors hover:bg-white/10"
-            >
-              Open on TikTok
-            </a>
-          )}
         </div>
 
         <div className="flex justify-center gap-3">

@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { ImageStreamHero } from "./components/ImageStreamHero";
 import { ReelGrid } from "./components/ReelGrid";
 import { ReelLightbox } from "./components/ReelLightbox";
+import { TubesCursor } from "./components/TubesCursor";
 import { REELS, type Reel } from "./data/reels";
 
 export default function App() {
@@ -17,6 +18,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-ink">
+      <TubesCursor />
+
       <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-between px-6 py-5 mix-blend-difference sm:px-10">
         <a href="#top" className="text-sm font-semibold tracking-tight text-white">
           Joshua James
@@ -28,7 +31,7 @@ export default function App() {
         </nav>
       </header>
 
-      <main id="top">
+      <main id="top" className="relative z-[1]">
         <ImageStreamHero
           reels={REELS}
           onSelect={open}
@@ -43,8 +46,7 @@ export default function App() {
               </h1>
             </div>
             <p className="max-w-md text-balance px-6 text-sm text-white/60">
-              Every frame in the stream is a real TikTok. Tap one to play it —
-              or scroll down for the full shelf.
+              Tap any frame to play it — or scroll down for the full shelf.
             </p>
           </div>
         </ImageStreamHero>
@@ -77,7 +79,7 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="border-t border-white/10 px-6 py-8 text-center text-xs text-mute sm:px-10">
+      <footer className="relative z-[1] border-t border-white/10 px-6 py-8 text-center text-xs text-mute sm:px-10">
         © {new Date().getFullYear()} Joshua James
       </footer>
 

@@ -102,6 +102,12 @@
     background: rgba(255,255,255,.1); font-size: 18px; }
   #close:hover { background: rgba(255,255,255,.2); }
 
+  /* ---- tubes cursor ---- */
+  /* Sits above the page background but below every piece of content, so the
+     tubes glow through the dark gaps rather than over the work. */
+  #tubes { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  main, footer { position: relative; z-index: 1; }
+
   @media (prefers-reduced-motion: reduce) { * { transition-duration: .001ms !important; } }
 </style>
 </head>
@@ -116,13 +122,15 @@
   </nav>
 </header>
 
+<canvas id="tubes"></canvas>
+
 <main id="top">
   <div id="hero">
     <div id="stage"><div id="origin"></div></div>
     <div id="vignette"></div>
     <div id="hero-copy">
       <h1>Short-form video,<br />front and centre.</h1>
-      <p>Every frame in the stream is a real TikTok. Tap one to play it — or scroll down for the full shelf.</p>
+      <p>Tap any frame to play it — or scroll down for the full shelf.</p>
     </div>
   </div>
 
@@ -158,7 +166,6 @@
         <p class="title" id="lb-title"></p>
         <p class="client" id="lb-client"></p>
       </div>
-      <a class="pill" id="lb-link" target="_blank" rel="noreferrer noopener">Open on TikTok</a>
     </div>
     <div class="nav">
       <button data-step="-1" aria-label="Previous reel">←</button>
@@ -169,28 +176,33 @@
 
 <script>
 // ---------------------------------------------------------------------------
-// YOUR WORK GOES HERE. Add one entry per TikTok:
-//   poster    – vertical 9:16 cover image URL
-//   tiktokUrl – the public link to the video (…/video/1234567890)
-//   videoSrc  – optional self-hosted mp4; used instead of the TikTok embed
+// YOUR WORK GOES HERE. Add one entry per video:
+//   poster   – vertical 9:16 cover frame (image URL)
+//   videoSrc – the video file itself (.mp4). Export your TikTok, upload it to
+//              the repo (e.g. /videos/my-reel.mp4) or a CDN, and point here.
+//              It plays in a plain frame — no TikTok player, no branding.
 // Everything else on the page is generated from this list.
 // ---------------------------------------------------------------------------
 const CDN = "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev";
-const TIKTOK = "https://www.tiktok.com/@tiktok/video/7106594312292453675"; // placeholder
+// PLACEHOLDER video files — swap these for your own exports.
+const SAMPLE = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/";
+const V1 = SAMPLE + "ForBiggerJoyrides.mp4";
+const V2 = SAMPLE + "ForBiggerBlazes.mp4";
+const V3 = SAMPLE + "ForBiggerEscapes.mp4";
 
 const REELS = [
-  { id:"sunset-diver",  title:"Sunset Diver",  client:"Personal", tags:["Edit","Colour"], poster:CDN+"/stock-images/767d99bb371a54d0d36751e8cecae43c.jpg", alt:"Diver silhouetted inside a sunset seascape", tiktokUrl:TIKTOK },
-  { id:"hue-flow",      title:"Hue Flow",      client:"Spec",     tags:["Motion"],        poster:CDN+"/gradients/hue-flow/hue-flow-01.png", alt:"Flowing hue gradient", tiktokUrl:TIKTOK },
-  { id:"city-double",   title:"City Double",   client:"Personal", tags:["Edit"],          poster:CDN+"/stock-images/821d815affa6496c39cbdeeec7a84603.jpg", alt:"Double-exposure portrait with a city skyline", tiktokUrl:TIKTOK },
-  { id:"crimson-aura",  title:"Crimson Aura",  client:"",         tags:["Motion","Sound"],poster:CDN+"/gradients/crimson_aura/crimson-aura-02.png", alt:"Crimson aura gradient", tiktokUrl:TIKTOK },
-  { id:"orange-motion", title:"Orange Motion", client:"Brand",    tags:["Campaign"],      poster:CDN+"/stock-images/937438c560ada1c83317f2c11b3454b0.jpg", alt:"Motion-blurred profile against deep orange", tiktokUrl:TIKTOK },
-  { id:"moon-grade",    title:"Moon Grade",    client:"",         tags:["Colour"],        poster:CDN+"/gradients/moon/moon-grade-03.png", alt:"Moon-toned gradient", tiktokUrl:TIKTOK },
-  { id:"racket-cloud",  title:"Racket Cloud",  client:"Spec",     tags:["VFX"],           poster:CDN+"/stock-images/98f89cb9994f5c382ab964062c4039db.jpg", alt:"Racket dissolving into a colourful cloud", tiktokUrl:TIKTOK },
-  { id:"hero-gradient", title:"Hero Gradient", client:"",         tags:["Motion"],        poster:CDN+"/gradients/hero_gradient/hero-gradients-01.png", alt:"Soft multi-tone gradient wash", tiktokUrl:TIKTOK },
-  { id:"bird-hand",     title:"Bird Hand",     client:"Brand",    tags:["Edit","VFX"],    poster:CDN+"/stock-images/ddcbee38be8b7274e19e132d7ab35b53.jpg", alt:"Hand with a bird cutout flying through the fingers", tiktokUrl:TIKTOK },
-  { id:"hue-flow-two",  title:"Hue Flow II",   client:"",         tags:["Motion"],        poster:CDN+"/gradients/hue-flow/hue-flow-02.png", alt:"Second flowing hue gradient", tiktokUrl:TIKTOK },
-  { id:"layered-hero",  title:"Layered Hero",  client:"",         tags:["Colour"],        poster:CDN+"/gradients/hero_gradient/hero-gradients-03.png", alt:"Layered hero gradient", tiktokUrl:TIKTOK },
-  { id:"deep-moon",     title:"Deep Moon",     client:"",         tags:["Colour"],        poster:CDN+"/gradients/moon/moon-grade-05.png", alt:"Deep moon-toned gradient", tiktokUrl:TIKTOK },
+  { id:"sunset-diver",  title:"Sunset Diver",  client:"Personal", tags:["Edit","Colour"], poster:CDN+"/stock-images/767d99bb371a54d0d36751e8cecae43c.jpg", alt:"Diver silhouetted inside a sunset seascape", videoSrc:V1 },
+  { id:"hue-flow",      title:"Hue Flow",      client:"Spec",     tags:["Motion"],        poster:CDN+"/gradients/hue-flow/hue-flow-01.png", alt:"Flowing hue gradient", videoSrc:V2 },
+  { id:"city-double",   title:"City Double",   client:"Personal", tags:["Edit"],          poster:CDN+"/stock-images/821d815affa6496c39cbdeeec7a84603.jpg", alt:"Double-exposure portrait with a city skyline", videoSrc:V3 },
+  { id:"crimson-aura",  title:"Crimson Aura",  client:"",         tags:["Motion","Sound"],poster:CDN+"/gradients/crimson_aura/crimson-aura-02.png", alt:"Crimson aura gradient", videoSrc:V1 },
+  { id:"orange-motion", title:"Orange Motion", client:"Brand",    tags:["Campaign"],      poster:CDN+"/stock-images/937438c560ada1c83317f2c11b3454b0.jpg", alt:"Motion-blurred profile against deep orange", videoSrc:V2 },
+  { id:"moon-grade",    title:"Moon Grade",    client:"",         tags:["Colour"],        poster:CDN+"/gradients/moon/moon-grade-03.png", alt:"Moon-toned gradient", videoSrc:V3 },
+  { id:"racket-cloud",  title:"Racket Cloud",  client:"Spec",     tags:["VFX"],           poster:CDN+"/stock-images/98f89cb9994f5c382ab964062c4039db.jpg", alt:"Racket dissolving into a colourful cloud", videoSrc:V1 },
+  { id:"hero-gradient", title:"Hero Gradient", client:"",         tags:["Motion"],        poster:CDN+"/gradients/hero_gradient/hero-gradients-01.png", alt:"Soft multi-tone gradient wash", videoSrc:V2 },
+  { id:"bird-hand",     title:"Bird Hand",     client:"Brand",    tags:["Edit","VFX"],    poster:CDN+"/stock-images/ddcbee38be8b7274e19e132d7ab35b53.jpg", alt:"Hand with a bird cutout flying through the fingers", videoSrc:V3 },
+  { id:"hue-flow-two",  title:"Hue Flow II",   client:"",         tags:["Motion"],        poster:CDN+"/gradients/hue-flow/hue-flow-02.png", alt:"Second flowing hue gradient", videoSrc:V1 },
+  { id:"layered-hero",  title:"Layered Hero",  client:"",         tags:["Colour"],        poster:CDN+"/gradients/hero_gradient/hero-gradients-03.png", alt:"Layered hero gradient", videoSrc:V2 },
+  { id:"deep-moon",     title:"Deep Moon",     client:"",         tags:["Colour"],        poster:CDN+"/gradients/moon/moon-grade-05.png", alt:"Deep moon-toned gradient", videoSrc:V3 },
 ];
 
 document.getElementById("year").textContent = new Date().getFullYear();
@@ -213,27 +225,38 @@ const nodes = REELS.map((reel, i) => {
   return b;
 });
 
-const LANE_EASE = 1.75, SPEED = 0.035;
+const SLIDE_W = 280;          // must match .slide width
+const S_MIN = 0.10;           // scale of a panel as it is born at the centre
+const S_MAX = 1.15;           // scale of a panel as it leaves the frame
+const SPEED = 0.035;
+const LN_R = Math.log(S_MAX / S_MIN);
 const lanes = Math.ceil(REELS.length / 2);
+// Panels sit shoulder to shoulder, so the gap between two of them has to grow
+// at the same rate as the panels do. Solving dx/du = panel width per step for
+// exponential growth gives this constant.
+// The 0.82 pulls the wings in and lets neighbours overlap slightly, so the
+// ribbon reads as continuous instead of showing seams between panels.
+const SPREAD = (SLIDE_W * lanes * 0.82) / LN_R;
 const reduced = matchMedia("(prefers-reduced-motion: reduce)");
 let progress = 0, paused = false, last = performance.now();
 
 function layout() {
-  const width = hero.clientWidth;
+  const k = hero.clientWidth / 1440;   // keep the corridor proportional
   nodes.forEach((node, i) => {
     // Even indices ride the left wing, odd the right, so the two mirror.
     const lane = i % 2 === 0 ? -1 : 1;
     const u = ((Math.floor(i / 2) / lanes + progress) % 1 + 1) % 1;
-    const eased = Math.pow(u, LANE_EASE);
-    const x = lane * (0.045 + eased * 0.6) * width;
-    const scale = 0.16 + eased * 1.15;
-    const rotate = lane * -(6 + eased * 24);
-    const fade = Math.min(1, u / 0.08) * Math.min(1, (1 - u) / 0.12);
-    node.style.transform = "translate3d(" + x + "px,0,0) rotateY(" + rotate + "deg) scale(" + scale + ")";
+    const s = S_MIN * Math.exp(LN_R * u);
+    // A newborn panel straddles the centre line itself, so the two wings share
+    // one seam and the ribbon never opens a hole in the middle.
+    const x = lane * SPREAD * (s - S_MIN) * k;
+    const rotate = lane * -(4 + u * 20);
+    const fade = Math.min(1, u / 0.02) * Math.min(1, (1 - u) / 0.04);
+    node.style.transform = "translate3d(" + x + "px,0,0) rotateY(" + rotate + "deg) scale(" + s * k + ")";
     node.style.opacity = fade;
     node.style.zIndex = Math.round(u * 100);
-    // Only the big, near slides should catch clicks.
-    node.style.pointerEvents = u > 0.35 && fade > 0.5 ? "auto" : "none";
+    // Only the big, near panels should catch clicks.
+    node.style.pointerEvents = u > 0.3 ? "auto" : "none";
   });
 }
 function tick(now) {
@@ -271,31 +294,18 @@ const lightbox = document.getElementById("lightbox");
 const player = document.getElementById("player");
 let current = null;
 
-/** Pulls the numeric video id out of a public TikTok URL. */
-function embedSrc(url) {
-  const m = url.match(/\/video\/(\d+)/) || url.match(/(\d{15,})/);
-  return m ? "https://www.tiktok.com/embed/v2/" + m[1] : null;
-}
-
 function open(index) {
   current = index;
   const reel = REELS[index];
   document.getElementById("lb-title").textContent = reel.title;
   document.getElementById("lb-client").textContent = reel.client || "";
-  const link = document.getElementById("lb-link");
-  link.href = reel.tiktokUrl || "#";
-  link.style.display = reel.tiktokUrl ? "" : "none";
 
-  if (reel.videoSrc) {
-    player.innerHTML = '<video src="' + reel.videoSrc + '" poster="' + reel.poster +
-      '" controls autoplay playsinline loop></video>';
-  } else {
-    const src = reel.tiktokUrl ? embedSrc(reel.tiktokUrl) : null;
-    player.innerHTML = src
-      ? '<iframe src="' + src + '" title="' + reel.title +
-        '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen"></iframe>'
-      : '<p style="display:grid;place-items:center;height:100%;padding:24px;text-align:center;color:#8a8a93;font-size:14px">No video set for this reel yet.</p>';
-  }
+  // A bare video frame — no third-party player, no branding, no comments.
+  player.innerHTML = reel.videoSrc
+    ? '<video src="' + reel.videoSrc + '" poster="' + reel.poster +
+      '" controls autoplay playsinline loop></video>'
+    : '<p style="display:grid;place-items:center;height:100%;padding:24px;text-align:center;color:#8a8a93;font-size:14px">No video file set for this reel yet.</p>';
+
   lightbox.dataset.open = "true";
   document.body.style.overflow = "hidden";
   document.getElementById("close").focus();
@@ -321,6 +331,46 @@ addEventListener("keydown", (e) => {
   if (e.key === "ArrowRight") step(1);
   if (e.key === "ArrowLeft") step(-1);
 });
+</script>
+
+<script type="module">
+// ---- tubes cursor --------------------------------------------------------
+// Loaded from a CDN and initialised after first paint: the library reads the
+// canvas size on start, and a zero-sized canvas makes its geometry NaN.
+// Everything here is best-effort — if the module fails to load, the page is
+// unaffected.
+const canvas = document.getElementById("tubes");
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  setTimeout(async () => {
+    try {
+      const { default: TubesCursor } = await import(
+        "https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js"
+      );
+      const app = TubesCursor(canvas, {
+        tubes: {
+          colors: ["#5e72e4", "#8965e0", "#f5365c"],
+          lights: {
+            intensity: 200,
+            colors: ["#21d4fd", "#b721ff", "#f4d03f", "#11cdef"],
+          },
+        },
+      });
+
+      const randomColors = (count) =>
+        Array.from({ length: count }, () =>
+          "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0"));
+
+      // Click anywhere to re-roll the palette. This never calls preventDefault,
+      // so slide and grid clicks still open the player.
+      addEventListener("click", () => {
+        app.tubes.setColors(randomColors(3));
+        app.tubes.setLightsColors(randomColors(4));
+      });
+    } catch (err) {
+      console.error("Tubes cursor failed to load:", err);
+    }
+  }, 100);
+}
 </script>
 </body>
 </html>
