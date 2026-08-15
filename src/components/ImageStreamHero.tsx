@@ -148,9 +148,12 @@ export function ImageStreamHero({
         </div>
       </div>
 
-      {/* Vignette keeps the copy readable over the stream. Kept fairly light so
-          the cursor tubes behind the page still read through. */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(5,5,5,0.82)_0%,rgba(5,5,5,0.12)_48%,rgba(5,5,5,0.75)_100%)]" />
+      {/*
+        No vignette here. A full-bleed overlay tinted the hero but stopped dead
+        at its bottom edge, which read as a dark panel sitting over the page.
+        The headline gets its contrast from its own text-shadow instead, so the
+        cursor tubes stay at full strength right through the section.
+      */}
 
       {children}
     </div>

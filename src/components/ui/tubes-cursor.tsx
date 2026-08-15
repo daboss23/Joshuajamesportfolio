@@ -78,7 +78,22 @@ export default function TubesCursor() {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-0" />;
+  /*
+   * The canvas needs a viewport-sized parent to measure.
+   *
+   * The library sizes its renderer from the canvas's parent element and writes
+   * the result back as an inline `width`/`height` on the canvas — which beats
+   * the utility classes. Left as a direct child of the page wrapper it measures
+   * the whole document, so the canvas ends up as tall as the page (five-plus
+   * screens here) while only the top slice is ever on screen, and the tubes
+   * shrink into a fraction of the viewport. Pinning the wrapper to the viewport
+   * means the measurement is one screen, whatever the page height.
+   */
+  return (
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      <canvas ref={canvasRef} />
+    </div>
+  );
 }
 
 export { TubesCursor };
