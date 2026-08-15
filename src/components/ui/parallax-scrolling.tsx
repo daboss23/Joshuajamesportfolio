@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { trackScrollProgress } from "../../lib/scroll-progress";
 
 /**
  * Scroll-driven parallax gallery.
@@ -7,9 +8,9 @@ import { useEffect, useRef } from "react";
  * artwork while that extra height scrolls past, and each column is translated by
  * its own multiple of the scroll progress so the layers separate in depth.
  *
- * Self-contained: no scroll library, no animation dependency. A single rAF loop
- * reads scroll position once per frame and eases toward it, which keeps the
- * motion smooth on trackpads without ever fighting native scrolling.
+ * Self-contained: no scroll library, no animation dependency — just the shared
+ * `trackScrollProgress` loop, which eases toward the scroll position so the
+ * motion stays smooth on trackpads without ever fighting native scrolling.
  */
 
 type Column = {
@@ -37,20 +38,8 @@ export function ParallaxComponent() {
     const section = sectionRef.current;
     if (!section) return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let frame = 0;
-    let eased = 0;
-    let target = 0;
-
-    const measure = () => {
-      const rect = section.getBoundingClientRect();
-      // Travel is however much of the section scrolls past a pinned stage.
-      const travel = Math.max(1, rect.height - window.innerHeight);
-      // 0 when the section's top hits the viewport top, 1 when its bottom does.
-      target = Math.min(1, Math.max(0, -rect.top / travel));
-    };
-
-    const paint = () => {
+    // Resting state is the midpoint: columns unshifted, headline centred.
+    return trackScrollProgress(section, (eased) => {
       // Signed distance from the midpoint: layers spread apart symmetrically
       // around the moment the stage is centred, rather than drifting one way.
       const p = eased - 0.5;
@@ -72,18 +61,7 @@ export function ParallaxComponent() {
         const centred = 1 - Math.min(1, Math.abs(p) * 2);
         stageRef.current.style.setProperty("--veil", String(0.35 + centred * 0.6));
       }
-    };
-
-    const tick = () => {
-      measure();
-      // Critically damped enough to feel weighty without lagging behind.
-      eased += (target - eased) * (reduced.matches ? 1 : 0.12);
-      paint();
-      frame = requestAnimationFrame(tick);
-    };
-
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+    }, { reducedValue: 0.5 });
   }, []);
 
   return (

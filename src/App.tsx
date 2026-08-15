@@ -1,9 +1,7 @@
 import { useCallback, useState } from "react";
-import { ImageStreamHero } from "./components/ImageStreamHero";
-import { ReelGrid } from "./components/ReelGrid";
 import { ReelLightbox } from "./components/ReelLightbox";
+import { ScrollShowcase } from "./components/ScrollShowcase";
 import { TubesCursor } from "./components/TubesCursor";
-import { ParallaxComponent } from "./components/ui/parallax-scrolling";
 import { REELS, type Reel } from "./data/reels";
 
 export default function App() {
@@ -33,11 +31,7 @@ export default function App() {
       </header>
 
       <main id="top" className="relative z-[1]">
-        <ImageStreamHero
-          reels={REELS}
-          onSelect={open}
-          className="h-[100svh] w-full"
-        >
+        <ScrollShowcase reels={REELS} onSelect={open}>
           <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-24 text-center sm:py-28">
             <div className="px-6">
               <h1 className="text-balance text-4xl font-medium tracking-tight text-white sm:text-6xl">
@@ -47,20 +41,11 @@ export default function App() {
               </h1>
             </div>
             <p className="max-w-md text-balance px-6 text-sm text-white/60">
-              Tap any frame to play it — or scroll down for the full shelf.
+              Tap any frame to play it — or keep scrolling.
             </p>
           </div>
-        </ImageStreamHero>
+        </ScrollShowcase>
 
-        <section id="work" className="mx-auto max-w-6xl px-6 py-24 sm:px-10">
-          <div className="mb-10 flex items-end justify-between gap-6">
-            <h2 className="text-2xl font-medium tracking-tight sm:text-3xl">Selected work</h2>
-            <p className="hidden text-sm text-mute sm:block">{REELS.length} reels</p>
-          </div>
-          <ReelGrid reels={REELS} onSelect={open} />
-        </section>
-
-        <ParallaxComponent />
         <div className="osmo-credits">
           <p className="osmo-credits__p">
             Resource by{" "}
