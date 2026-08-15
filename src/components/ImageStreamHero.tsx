@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import type { Reel } from "../data/reels";
+import { SlotFrame } from "./SlotFrame";
 
 gsap.registerPlugin(useGSAP);
 
@@ -237,15 +238,23 @@ export function ImageStreamHero({
                 backfaceVisibility: "hidden",
               }}
             >
-              <img
-                src={panel.reel.poster}
-                alt={panel.mirrored ? "" : panel.reel.alt}
-                loading={panel.slot < 4 ? "eager" : "lazy"}
-                decoding="async"
-                draggable={false}
-                className="h-full w-full rounded-sm object-cover shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
-                style={panel.mirrored ? { transform: "scaleX(-1)" } : undefined}
-              />
+              {panel.reel.poster ? (
+                <img
+                  src={panel.reel.poster}
+                  alt={panel.mirrored ? "" : (panel.reel.alt ?? "")}
+                  loading={panel.slot < 4 ? "eager" : "lazy"}
+                  decoding="async"
+                  draggable={false}
+                  className="h-full w-full rounded-sm object-cover shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
+                  style={panel.mirrored ? { transform: "scaleX(-1)" } : undefined}
+                />
+              ) : (
+                // Placeholder frames are not flipped — a mirrored slot number
+                // reads as a rendering fault rather than as symmetry.
+                <div className="h-full w-full shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]">
+                  <SlotFrame index={panel.slot} />
+                </div>
+              )}
               {/* Hairline rim keeps panels separable where they overlap. */}
               <span className="pointer-events-none absolute inset-0 rounded-sm ring-1 ring-inset ring-white/10" />
 
