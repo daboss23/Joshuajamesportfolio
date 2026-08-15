@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { CursorHint } from "./components/CursorHint";
 import { ReelLightbox } from "./components/ReelLightbox";
 import { ScrollShowcase } from "./components/ScrollShowcase";
+import { PortfolioSections } from "./components/PortfolioSections";
 import TubesCursor from "./components/ui/tubes-cursor";
 import { REELS, type Reel } from "./data/reels";
 
@@ -20,14 +21,15 @@ export default function App() {
     <div className="min-h-screen bg-ink">
       <TubesCursor />
 
-      <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-between px-6 py-5 mix-blend-difference sm:px-10">
-        <a href="#top" className="text-sm font-semibold tracking-tight text-white">
-          Joshua James
+      <header className="site-header fixed inset-x-0 top-0 z-40 flex items-center justify-between px-6 py-5 sm:px-10">
+        <a href="#top" className="site-logo text-sm font-semibold tracking-tight text-white">
+          Joshua James <span>Motion &amp; edit</span>
         </a>
-        <nav className="flex items-center gap-6 text-sm text-white/80">
-          <a href="#work" className="hover:text-white">Work</a>
+        <nav className="header-nav flex items-center gap-6 text-sm text-white/80">
+          <a href="#selected-work" className="hover:text-white">Work</a>
+          <a href="#services" className="hover:text-white">Services</a>
           <a href="#about" className="hover:text-white">About</a>
-          <a href="#contact" className="hover:text-white">Contact</a>
+          <a href="#contact" className="header-cta">Let’s talk <span>↗</span></a>
         </nav>
       </header>
 
@@ -50,43 +52,8 @@ export default function App() {
           </div>
         </ScrollShowcase>
 
-        <div className="osmo-credits">
-          <p className="osmo-credits__p">
-            Resource by{" "}
-            <a
-              target="_blank"
-              rel="noreferrer"
-              href="https://www.osmo.supply/"
-              className="osmo-credits__p-a"
-            >
-              Osmo
-            </a>
-          </p>
-        </div>
-
-        <section id="about" className="mx-auto max-w-3xl px-6 py-24 sm:px-10">
-          <h2 className="mb-6 text-2xl font-medium tracking-tight sm:text-3xl">About</h2>
-          <p className="text-lg leading-relaxed text-mute">
-            I make short-form video that earns the second watch — hooks, pacing,
-            colour and sound design for brands that live on TikTok, Reels and
-            Shorts. Editing, motion and grade handled end to end.
-          </p>
-        </section>
-
-        <section id="contact" className="mx-auto max-w-3xl px-6 pb-32 sm:px-10">
-          <h2 className="mb-6 text-2xl font-medium tracking-tight sm:text-3xl">Contact</h2>
-          <a
-            href="mailto:mindblastmarketing@gmail.com"
-            className="inline-block rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition-opacity hover:opacity-85"
-          >
-            mindblastmarketing@gmail.com
-          </a>
-        </section>
+        <PortfolioSections />
       </main>
-
-      <footer className="relative z-[1] border-t border-white/10 px-6 py-8 text-center text-xs text-mute sm:px-10">
-        © {new Date().getFullYear()} Joshua James
-      </footer>
 
       <ReelLightbox
         reel={activeIndex === null ? null : REELS[activeIndex]}
