@@ -25,7 +25,7 @@ export function ImageStreamHero({
   onSelect,
   className = "",
   children,
-  speed = 0.035,
+  speed = 0.023,
 }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLButtonElement | null)[]>([]);

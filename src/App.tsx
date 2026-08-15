@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { CursorHint } from "./components/CursorHint";
 import { ReelLightbox } from "./components/ReelLightbox";
 import { ScrollShowcase } from "./components/ScrollShowcase";
 import TubesCursor from "./components/ui/tubes-cursor";
@@ -40,9 +41,12 @@ export default function App() {
                 front and centre.
               </h1>
             </div>
-            <p className="max-w-md text-balance px-6 text-sm text-white/70 [text-shadow:0_2px_20px_rgba(0,0,0,0.95)]">
-              Tap any frame to play it — or keep scrolling.
-            </p>
+            <div className="flex flex-col items-center gap-3 px-6">
+              <p className="max-w-md text-balance text-sm text-white/70 [text-shadow:0_2px_20px_rgba(0,0,0,0.95)]">
+                Tap any frame to play it — or keep scrolling.
+              </p>
+              <CursorHint />
+            </div>
           </div>
         </ScrollShowcase>
 
