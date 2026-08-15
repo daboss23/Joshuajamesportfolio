@@ -17,7 +17,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-ink">
+    <div className="grain min-h-screen bg-ink">
       <TubesCursor />
 
       <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-between px-6 py-5 mix-blend-difference sm:px-10">
@@ -39,14 +39,30 @@ export default function App() {
         >
           <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-24 text-center sm:py-28">
             <div className="px-6">
-              <h1 className="text-balance text-4xl font-medium tracking-tight text-white sm:text-6xl">
-                Short-form video,
-                <br />
-                front and centre.
+              {/*
+                Each line is clipped by its own overflow-hidden wrapper so the
+                GSAP entrance can slide it up from behind a hard edge. Splitting
+                on lines rather than characters keeps the markup readable to
+                screen readers. DESIGN.md §6.
+              */}
+              <h1 className="text-balance text-[clamp(2rem,6.5vw,6rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-chalk">
+                <span className="block overflow-hidden pb-[0.08em]">
+                  <span data-hero-line className="block">
+                    Short-form video,
+                  </span>
+                </span>
+                <span className="block overflow-hidden pb-[0.08em]">
+                  <span data-hero-line className="block">
+                    front and centre.
+                  </span>
+                </span>
               </h1>
             </div>
-            <p className="max-w-md text-balance px-6 text-sm text-white/60">
-              Tap any frame to play it — or scroll down for the full shelf.
+            <p
+              data-hero-sub
+              className="max-w-sm text-balance px-6 text-sm leading-relaxed text-mute"
+            >
+              Tap any frame to play it — or scroll for the full shelf.
             </p>
           </div>
         </ImageStreamHero>

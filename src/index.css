@@ -1,10 +1,13 @@
 @import "tailwindcss";
 
+/* Tokens — the single source of truth is DESIGN.md §2. Dark-only by design. */
 @theme {
   --color-ink: #050505;
   --color-ink-soft: #0b0b0d;
+  --color-ink-lift: #141418;
   --color-chalk: #f4f4f5;
   --color-mute: #8a8a93;
+  --color-mute-deep: #55555e;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
@@ -17,10 +20,36 @@ body {
   color: var(--color-chalk);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   overflow-x: hidden;
 }
 
+/*
+  Film grain. Near-black gradients band badly on 8-bit panels; a couple of
+  percent of noise over the top dissolves the banding and takes the digital
+  sterility off the void. Fixed attachment so it reads as an optical property
+  of the screen rather than something glued to the page. DESIGN.md §7.
+*/
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/*
+  Reduced motion freezes the corridor where it stands — it is never replaced
+  with a flat grid. The layout is identical, just static. DESIGN.md §6.
+*/
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
