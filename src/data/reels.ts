@@ -2,7 +2,10 @@ export type Reel = {
   /** Stable id, used for deep links (#/reel/<id>) and React keys. */
   id: string;
   title: string;
-  /** Vertical 9:16 cover frame. */
+  /**
+   * Vertical 9:16 cover frame. Currently a generated placeholder from
+   * `scripts/gen-thumbs.mjs` — swap for a real frame export per reel.
+   */
   poster: string;
   alt: string;
   /**
@@ -14,7 +17,6 @@ export type Reel = {
   tags?: string[];
 };
 
-const CDN = "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev";
 // PLACEHOLDER video files — swap these for your own exports.
 const SAMPLE = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/";
 const [V1, V2, V3] = [
@@ -31,8 +33,8 @@ export const REELS: Reel[] = [
   {
     id: "sunset-diver",
     title: "Sunset Diver",
-    poster: `${CDN}/stock-images/767d99bb371a54d0d36751e8cecae43c.jpg`,
-    alt: "Diver silhouetted inside a sunset seascape shaped like a profile",
+    poster: "/thumbs/sunset-diver.svg",
+    alt: "Generated placeholder: a drunk polyline walk over a bruised violet field",
     videoSrc: V1,
     client: "Personal",
     tags: ["Edit", "Colour"],
@@ -40,8 +42,8 @@ export const REELS: Reel[] = [
   {
     id: "hue-flow",
     title: "Hue Flow",
-    poster: `${CDN}/gradients/hue-flow/hue-flow-01.png`,
-    alt: "Flowing hue gradient",
+    poster: "/thumbs/hue-flow.svg",
+    alt: "Generated placeholder: interfering line grids in cyan and magenta",
     videoSrc: V2,
     client: "Spec",
     tags: ["Motion"],
@@ -49,8 +51,8 @@ export const REELS: Reel[] = [
   {
     id: "city-double",
     title: "City Double",
-    poster: `${CDN}/stock-images/821d815affa6496c39cbdeeec7a84603.jpg`,
-    alt: "Double-exposure portrait blended with a city skyline at dusk",
+    poster: "/thumbs/city-double.svg",
+    alt: "Generated placeholder: concentric wobbling rings around a magenta pupil",
     videoSrc: V3,
     client: "Personal",
     tags: ["Edit"],
@@ -58,16 +60,16 @@ export const REELS: Reel[] = [
   {
     id: "crimson-aura",
     title: "Crimson Aura",
-    poster: `${CDN}/gradients/crimson_aura/crimson-aura-02.png`,
-    alt: "Crimson aura gradient",
+    poster: "/thumbs/crimson-aura.svg",
+    alt: "Generated placeholder: concentric rings around a cyan pupil, crimson scanlines",
     videoSrc: V1,
     tags: ["Motion", "Sound"],
   },
   {
     id: "orange-motion",
     title: "Orange Motion",
-    poster: `${CDN}/stock-images/937438c560ada1c83317f2c11b3454b0.jpg`,
-    alt: "Motion-blurred side-profile portrait against a deep orange backdrop",
+    poster: "/thumbs/orange-motion.svg",
+    alt: "Generated placeholder: a dense orange moire interference field",
     videoSrc: V2,
     client: "Brand",
     tags: ["Campaign"],
@@ -75,16 +77,16 @@ export const REELS: Reel[] = [
   {
     id: "moon-grade",
     title: "Moon Grade",
-    poster: `${CDN}/gradients/moon/moon-grade-03.png`,
-    alt: "Moon-toned gradient",
+    poster: "/thumbs/moon-grade.svg",
+    alt: "Generated placeholder: a spidery random walk on near-black",
     videoSrc: V3,
     tags: ["Colour"],
   },
   {
     id: "racket-cloud",
     title: "Racket Cloud",
-    poster: `${CDN}/stock-images/98f89cb9994f5c382ab964062c4039db.jpg`,
-    alt: "Figure holding a racket that dissolves into a swirling colourful cloud",
+    poster: "/thumbs/racket-cloud.svg",
+    alt: "Generated placeholder: melting horizontal bands in magenta and cyan",
     videoSrc: V1,
     client: "Spec",
     tags: ["VFX"],
@@ -92,16 +94,16 @@ export const REELS: Reel[] = [
   {
     id: "hero-gradient",
     title: "Hero Gradient",
-    poster: `${CDN}/gradients/hero_gradient/hero-gradients-01.png`,
-    alt: "Soft multi-tone gradient wash",
+    poster: "/thumbs/hero-gradient.svg",
+    alt: "Generated placeholder: amber rings around a teal pupil",
     videoSrc: V2,
     tags: ["Motion"],
   },
   {
     id: "bird-hand",
     title: "Bird Hand",
-    poster: `${CDN}/stock-images/ddcbee38be8b7274e19e132d7ab35b53.jpg`,
-    alt: "Hand gesture with a colourful cutout of a bird flying through the fingers",
+    poster: "/thumbs/bird-hand.svg",
+    alt: "Generated placeholder: violet and amber rings around an orange pupil",
     videoSrc: V3,
     client: "Brand",
     tags: ["Edit", "VFX"],
@@ -109,24 +111,24 @@ export const REELS: Reel[] = [
   {
     id: "hue-flow-two",
     title: "Hue Flow II",
-    poster: `${CDN}/gradients/hue-flow/hue-flow-02.png`,
-    alt: "Second flowing hue gradient",
+    poster: "/thumbs/hue-flow-two.svg",
+    alt: "Generated placeholder: a rotating square tunnel in teal and amber",
     videoSrc: V1,
     tags: ["Motion"],
   },
   {
     id: "layered-hero",
     title: "Layered Hero",
-    poster: `${CDN}/gradients/hero_gradient/hero-gradients-03.png`,
-    alt: "Layered hero gradient",
+    poster: "/thumbs/layered-hero.svg",
+    alt: "Generated placeholder: a rotating square tunnel fanning off-centre",
     videoSrc: V2,
     tags: ["Colour"],
   },
   {
     id: "deep-moon",
     title: "Deep Moon",
-    poster: `${CDN}/gradients/moon/moon-grade-05.png`,
-    alt: "Deep moon-toned gradient",
+    poster: "/thumbs/deep-moon.svg",
+    alt: "Generated placeholder: a fine crosshatch moire with coral scanlines",
     videoSrc: V3,
     tags: ["Colour"],
   },

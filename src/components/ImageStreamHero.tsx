@@ -30,7 +30,13 @@ export function ImageStreamHero({
   const rootRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const progress = useRef(0);
-  const paused = useRef(false);
+  /**
+   * Number of slides currently hovered or focused. A count rather than a
+   * boolean because slides overlap: sliding from one card straight onto its
+   * neighbour fires the new card's enter before the old card's leave, and a
+   * boolean would flap back to "moving" for a frame.
+   */
+  const held = useRef(0);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -75,7 +81,7 @@ export function ImageStreamHero({
     const tick = (now: number) => {
       const dt = Math.min(now - last, 64) / 1000;
       last = now;
-      if (!paused.current && !reduced.matches) {
+      if (held.current === 0 && !reduced.matches) {
         progress.current = (progress.current + dt * speed) % 1;
       }
       layout();
@@ -91,15 +97,15 @@ export function ImageStreamHero({
     };
   }, [reels, speed]);
 
+  // The root's leave handler is a safety net: if a card is unmounted or loses
+  // pointer capture while held (e.g. the lightbox opens over it), its own leave
+  // never fires, so the count is zeroed once the pointer is out of the hero.
   return (
     <div
       ref={rootRef}
       className={`relative isolate overflow-hidden ${className}`}
       style={{ perspective: "1400px" }}
-      onPointerEnter={() => (paused.current = true)}
-      onPointerLeave={() => (paused.current = false)}
-      onFocusCapture={() => (paused.current = true)}
-      onBlurCapture={() => (paused.current = false)}
+      onPointerLeave={() => (held.current = 0)}
     >
       <div
         className="pointer-events-none absolute inset-0"
@@ -114,6 +120,10 @@ export function ImageStreamHero({
               }}
               type="button"
               onClick={() => onSelect(reel)}
+              onPointerEnter={() => (held.current += 1)}
+              onPointerLeave={() => (held.current = Math.max(0, held.current - 1))}
+              onFocus={() => (held.current += 1)}
+              onBlur={() => (held.current = Math.max(0, held.current - 1))}
               aria-label={`Play ${reel.title}`}
               className="group absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
               style={{ width: 280, height: 498, willChange: "transform, opacity" }}

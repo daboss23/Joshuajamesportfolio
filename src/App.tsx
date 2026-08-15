@@ -3,6 +3,7 @@ import { ImageStreamHero } from "./components/ImageStreamHero";
 import { ReelGrid } from "./components/ReelGrid";
 import { ReelLightbox } from "./components/ReelLightbox";
 import { TubesCursor } from "./components/TubesCursor";
+import { ParallaxComponent } from "./components/ui/parallax-scrolling";
 import { REELS, type Reel } from "./data/reels";
 
 export default function App() {
@@ -58,6 +59,21 @@ export default function App() {
           </div>
           <ReelGrid reels={REELS} onSelect={open} />
         </section>
+
+        <ParallaxComponent />
+        <div className="osmo-credits">
+          <p className="osmo-credits__p">
+            Resource by{" "}
+            <a
+              target="_blank"
+              rel="noreferrer"
+              href="https://www.osmo.supply/"
+              className="osmo-credits__p-a"
+            >
+              Osmo
+            </a>
+          </p>
+        </div>
 
         <section id="about" className="mx-auto max-w-3xl px-6 py-24 sm:px-10">
           <h2 className="mb-6 text-2xl font-medium tracking-tight sm:text-3xl">About</h2>
