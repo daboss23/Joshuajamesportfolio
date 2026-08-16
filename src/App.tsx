@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { initSmoothScroll } from "./lib/smooth-scroll";
 import { CrystalIntro } from "./components/CrystalIntro";
 import { CursorHint } from "./components/CursorHint";
 import { ScrollProgress } from "./components/ScrollProgress";
@@ -10,6 +11,8 @@ import { REELS, type Reel } from "./data/reels";
 
 export default function App() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  useEffect(() => initSmoothScroll(), []);
 
   const open = useCallback((reel: Reel) => {
     setActiveIndex(REELS.findIndex((r) => r.id === reel.id));
@@ -42,13 +45,13 @@ export default function App() {
         <ScrollShowcase reels={REELS} onSelect={open}>
           <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-24 text-center sm:py-28">
             <div className="px-6">
-              {/* The opening title sequence now carries the page's h1, so this
-                  steps down to a section heading rather than competing with it. */}
-              <h2 className="text-balance text-4xl font-medium tracking-tight text-white [text-shadow:0_2px_30px_rgba(0,0,0,0.95)] sm:text-6xl">
+              {/* The opening film carries no copy of its own, so this is the
+                  page's first and top-level heading. */}
+              <h1 className="text-balance text-4xl font-medium tracking-tight text-white [text-shadow:0_2px_30px_rgba(0,0,0,0.95)] sm:text-6xl">
                 Short-form video,
                 <br />
                 front and centre.
-              </h2>
+              </h1>
             </div>
             <div className="flex flex-col items-center gap-3 px-6">
               <p className="max-w-md text-balance text-sm text-white/70 [text-shadow:0_2px_20px_rgba(0,0,0,0.95)]">

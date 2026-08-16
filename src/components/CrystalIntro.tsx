@@ -9,41 +9,35 @@ import { trackScrollProgress } from "../lib/scroll-progress";
 const SCRUB_END = 0.74;
 const EXIT_END = 0.96;
 
+/** Frames are numbered from 1, zero-padded to three digits. */
+const FRAME_COUNT = 185;
+
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
-
-/**
- * Picks the film to load.
- *
- * Resolution is chosen here rather than with `<source media>`: that attribute
- * is only honoured inside `<picture>`, and a `<video>` takes the first source
- * regardless — which would push the desktop file at phones.
- *
- * H.264 is preferred where it decodes, because it is the smaller file and has
- * hardware decode essentially everywhere. The VP9 copies exist for Chromium
- * builds shipped without the proprietary codecs — common on Linux — which
- * would otherwise get a permanently blank stage rather than a fallback.
- */
-const introSource = () => {
-  const small = !window.matchMedia("(min-width: 768px)").matches;
-  const probe = document.createElement("video");
-  const h264 = probe.canPlayType('video/mp4; codecs="avc1.4d401f"') !== "";
-
-  if (h264) return small ? "/video/crystal-intro-sm.mp4" : "/video/crystal-intro.mp4";
-  return small ? "/video/crystal-intro-sm.webm" : "/video/crystal-intro.webm";
-};
 
 const smoothstep = (edge0: number, edge1: number, value: number) => {
   const x = clamp((value - edge0) / (edge1 - edge0));
   return x * x * (3 - 2 * x);
 };
 
+const frameUrl = (dir: string, index: number) =>
+  `/frames/${dir}/${String(index + 1).padStart(3, "0")}.jpg`;
+
 /**
  * The opening film, scrubbed by the scroll wheel.
  *
- * The source is encoded all-intra (every frame a keyframe) precisely so that
- * `currentTime` can be thrown anywhere without the decoder having to walk
- * forward from the previous keyframe — that is the whole difference between a
- * scrub that snaps and one that glides.
+ * Drawn as a still sequence rather than played as a video. Scrubbing a
+ * `<video>` means assigning `currentTime` and waiting: the seek is
+ * asynchronous, the browser coalesces and rate-limits it, and the picture
+ * arrives some frames after the wheel did — which is exactly the lag and
+ * stepping that made the first attempt feel broken. Decoded stills have no
+ * such pipeline. The frame for a given scroll position is simply drawn, every
+ * animation frame, so the film tracks the wheel exactly.
+ *
+ * The trade is bandwidth, and it is smaller than it looks: the sequence is
+ * every frame of the source clip at 4.3MB, against 2.8MB for the equivalent
+ * all-intra video that could not be scrubbed cleanly anyway. It also drops the
+ * codec problem entirely — a JPEG decodes everywhere, so there is no H.264
+ * fallback to carry and no iOS gesture to wait for before the first frame.
  *
  * The film ends with the camera flying into the crystal, so the handoff is
  * built as a continuation of that move rather than a cut: the frame keeps
@@ -55,64 +49,160 @@ const smoothstep = (edge0: number, edge1: number, value: number) => {
 export function CrystalIntro() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const flashRef = useRef<HTMLDivElement>(null);
-  const copyRef = useRef<HTMLDivElement>(null);
   const cueRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
-    const video = videoRef.current;
-    if (!section || !video) return;
+    const canvas = canvasRef.current;
+    if (!section || !canvas) return;
 
-    // Reduced motion collapses this section to a still (see the media query in
-    // index.css), so there is nothing to scrub and no reason to pull down a
-    // multi-megabyte film — the poster is the same frame. The header has no
-    // title sequence to stay out of either, so it is released immediately.
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      document.documentElement.dataset.chrome = "on";
-      return;
-    }
+    const context = canvas.getContext("2d", { alpha: false });
+    if (!context) return;
 
-    video.src = introSource();
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Phones get a narrower sequence: a quarter of the bytes for a picture
+    // that is never displayed above ~430 CSS pixels wide anyway.
+    const dir = window.matchMedia("(min-width: 768px)").matches ? "hi" : "lo";
+
+    const frames: HTMLImageElement[] = [];
+    const ready: boolean[] = new Array(FRAME_COUNT).fill(false);
+
+    /** The frame the scroll is asking for, whether or not it has arrived yet. */
+    let wanted = 0;
+    /** The frame actually on the canvas, so an unchanged frame costs nothing. */
+    let painted = -1;
 
     /**
-     * Safari on iOS will not decode a frame until the element has been touched
-     * by a gesture, so a scrub-only video sits on its poster forever. One
-     * muted play/pause on the first interaction is enough to hand us the
-     * decoder; after that, seeking works for the rest of the visit.
+     * Falls back to the nearest already-decoded frame. Early in the visit most
+     * of the sequence is still in flight, and holding a neighbouring frame
+     * looks like a film that has not caught up — where drawing nothing would
+     * flash the stage empty on every index that has yet to load.
      */
-    let unlocked = false;
-    const unlock = () => {
-      if (unlocked) return;
-      unlocked = true;
-      video.play().then(() => video.pause()).catch(() => {});
+    const nearestReady = (index: number) => {
+      if (ready[index]) return index;
+      for (let step = 1; step < FRAME_COUNT; step += 1) {
+        if (ready[index - step]) return index - step;
+        if (ready[index + step]) return index + step;
+      }
+      return -1;
     };
-    const unlockEvents = ["pointerdown", "touchstart", "wheel", "keydown"] as const;
-    unlockEvents.forEach((name) =>
-      window.addEventListener(name, unlock, { once: true, passive: true }),
-    );
+
+    const paint = (force = false) => {
+      const source = nearestReady(wanted);
+      if (source < 0 || (source === painted && !force)) return;
+      painted = source;
+
+      const image = frames[source];
+      const { width, height } = canvas;
+      // `object-fit: cover` by hand, since a canvas scales its bitmap rather
+      // than laying it out.
+      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+      const w = image.naturalWidth * scale;
+      const h = image.naturalHeight * scale;
+      context.drawImage(image, (width - w) / 2, (height - h) / 2, w, h);
+    };
+
+    /*
+     * Staged loading.
+     *
+     * Requesting all 185 frames at once holds the window `load` event open
+     * until the last one lands — thirteen seconds of it on a connection that
+     * cannot open 185 sockets — and gives the viewer nothing to look at any
+     * sooner, because the frames arrive in file order rather than in the order
+     * the scroll needs them.
+     *
+     * So a sparse spine of every eighth frame is fetched first. That is enough
+     * for the whole film to be scrubbable almost immediately, at reduced
+     * temporal resolution, because `nearestReady` will hold a neighbouring
+     * frame for any index that has not arrived. The remaining frames are
+     * deferred until after load and trickle in at low priority, filling the
+     * gaps between the spine until the scrub is frame-exact.
+     */
+    const SPINE_STRIDE = 8;
+    const MAX_IN_FLIGHT = 10;
+
+    let cancelled = false;
+    let inFlight = 0;
+    const deferred: number[] = [];
+
+    const request = (i: number, priority: "high" | "low") => {
+      const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = priority;
+      inFlight += 1;
+      const done = () => {
+        inFlight -= 1;
+        if (!cancelled) pump();
+      };
+      image.onload = () => {
+        ready[i] = true;
+        // Repaint if this frame is a better match than whatever stand-in is
+        // currently up — including the very first frame landing on an empty
+        // stage, and any frame that fills in behind a scroll already past it.
+        if (painted < 0 || Math.abs(i - wanted) < Math.abs(painted - wanted)) paint();
+        done();
+      };
+      image.onerror = done;
+      image.src = frameUrl(dir, i);
+      frames[i] = image;
+    };
+
+    const pump = () => {
+      while (!cancelled && inFlight < MAX_IN_FLIGHT && deferred.length > 0) {
+        request(deferred.shift()!, "low");
+      }
+    };
+
+    for (let i = 0; i < FRAME_COUNT; i += 1) {
+      // The last frame is on the spine whatever the stride works out to: it is
+      // the one the handoff blooms out of, so it must never be a stand-in.
+      if (i % SPINE_STRIDE === 0 || i === FRAME_COUNT - 1) request(i, "high");
+      else deferred.push(i);
+    }
+
+    const startDeferred = () => {
+      if (!cancelled) pump();
+    };
+    if (document.readyState === "complete") startDeferred();
+    else window.addEventListener("load", startDeferred, { once: true });
+
+    const resize = () => {
+      // Capped at 2: beyond that the extra pixels are invisible and the fill
+      // rate is not.
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(canvas.clientWidth * dpr);
+      canvas.height = Math.round(canvas.clientHeight * dpr);
+      // Resizing a canvas clears it, so the current frame has to go back down —
+      // hence forcing past the "already painted" check.
+      paint(true);
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+
+    if (reduced) {
+      // No scrubbing and no handoff — the section is collapsed to a single
+      // screen in CSS, so it just shows the opening frame.
+      document.documentElement.dataset.chrome = "on";
+      return () => {
+        cancelled = true;
+        window.removeEventListener("resize", resize);
+        window.removeEventListener("load", startDeferred);
+      };
+    }
 
     const stop = trackScrollProgress(
       section,
       (progress) => {
         const stage = stageRef.current;
         const flash = flashRef.current;
-        const copy = copyRef.current;
         const cue = cueRef.current;
-        if (!stage || !flash || !copy || !cue) return;
+        if (!stage || !flash || !cue) return;
 
-        const duration = video.duration;
-        if (Number.isFinite(duration) && duration > 0) {
-          // A hair short of the very end: the final frame is often a partial
-          // one, and seeking exactly to `duration` can bounce back to 0.
-          const target = clamp(progress / SCRUB_END) * (duration - 0.05);
-          // Only ever hold one seek in flight. Queueing them makes the decoder
-          // fall behind the wheel and the picture judder.
-          if (!video.seeking && Math.abs(video.currentTime - target) > 1 / 60) {
-            video.currentTime = target;
-          }
-        }
+        wanted = Math.round(clamp(progress / SCRUB_END) * (FRAME_COUNT - 1));
+        paint();
 
         // The push-in never stops — it just runs out of film and keeps going,
         // which is what sells the handoff as one continuous camera move.
@@ -125,58 +215,36 @@ export function CrystalIntro() {
         stage.style.filter = `blur(${exit * exit * 16}px)`;
         stage.style.pointerEvents = exit > 0.5 ? "none" : "auto";
 
-        // Released as the bloom peaks, so navigation never floats over the
-        // title sequence but is in place by the time the hero is legible.
+        // Released as the bloom peaks, so navigation and the cursor trail never
+        // sit over the title sequence but are in place for the montage.
         document.documentElement.dataset.chrome = exit > 0.5 ? "on" : "off";
 
         // Light blowing out through the facet, peaking mid-handoff so the cut
         // itself happens inside the white.
         flash.style.opacity = String(Math.sin(exit * Math.PI) * 0.92);
 
-        const intro = smoothstep(0.02, 0.14, progress);
-        const copyOut = 1 - smoothstep(0.2, 0.42, progress);
-        copy.style.opacity = String(intro * copyOut);
-        copy.style.transform = `translate3d(0, ${(1 - intro) * 26 - progress * 60}px, 0)`;
         cue.style.opacity = String((1 - smoothstep(0.04, 0.16, progress)) * 0.9);
       },
-      { ease: 0.14 },
+      // Light: the scroll position arriving here is already interpolated (see
+      // lib/smooth-scroll), so heavy easing on top only adds lag.
+      { ease: 0.3 },
     );
 
     return () => {
+      cancelled = true;
       stop();
-      unlockEvents.forEach((name) => window.removeEventListener(name, unlock));
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("load", startDeferred);
     };
   }, []);
 
   return (
-    <section ref={sectionRef} className="intro-scroll" aria-label="Opening title sequence">
+    <section ref={sectionRef} className="intro-scroll" aria-label="Opening film">
       <div ref={stageRef} className="intro-stage">
-        <video
-          ref={videoRef}
-          className="intro-video"
-          // Muted + inline + no controls: this is set dressing that happens to
-          // be a video file, not a player anyone is meant to operate.
-          muted
-          playsInline
-          preload="auto"
-          disablePictureInPicture
-          poster="/video/crystal-intro-poster.jpg"
-          aria-hidden="true"
-          tabIndex={-1}
-        />
+        <canvas ref={canvasRef} className="intro-canvas" aria-hidden="true" />
 
-        <div className="intro-grain" aria-hidden="true" />
         <div className="intro-vignette" aria-hidden="true" />
         <div ref={flashRef} className="intro-flash" aria-hidden="true" />
-
-        <div ref={copyRef} className="intro-copy">
-          <p className="intro-kicker"><span />Motion &amp; edit<span /></p>
-          <h1 className="intro-title">
-            <span>Joshua</span>
-            <span>James</span>
-          </h1>
-          <p className="intro-sub">Short-form video, cut to be felt.</p>
-        </div>
 
         <div ref={cueRef} className="intro-cue" aria-hidden="true">
           <span>Scroll</span>

@@ -36,8 +36,22 @@ export function trackScrollProgress(
   let frame = 0;
   let eased = 0;
   let primed = false;
+  let last = performance.now();
 
-  const tick = () => {
+  /*
+   * `ease` is quoted as a per-frame fraction, which is only meaningful at
+   * 60Hz: applied literally it makes every scroll-linked animation converge
+   * twice as fast on a 120Hz display and crawl on a loaded tab, so the same
+   * page feels different on different machines. Converting it to a decay rate
+   * and integrating against real elapsed time gives identical motion at any
+   * refresh rate.
+   */
+  const lambda = -60 * Math.log(1 - ease);
+
+  const tick = (now: number) => {
+    const dt = Math.min((now - last) / 1000, 1 / 20);
+    last = now;
+
     const rect = el.getBoundingClientRect();
     const travel = Math.max(1, rect.height - window.innerHeight);
     const target = Math.min(1, Math.max(0, -rect.top / travel));
@@ -48,7 +62,7 @@ export function trackScrollProgress(
       eased = target;
       primed = true;
     } else {
-      eased += (target - eased) * ease;
+      eased += (target - eased) * (1 - Math.exp(-lambda * dt));
     }
 
     onFrame(eased);

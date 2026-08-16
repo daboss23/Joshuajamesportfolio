@@ -8,8 +8,15 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+/*
+ * Deliberately not `scroll-behavior: smooth`. Anchor jumps are interpolated by
+ * Lenis (see lib/smooth-scroll), and the two together fight each other — the
+ * native behaviour animates the same scroll Lenis is already animating, which
+ * reads as a stutter at the end of every jump. Reduced-motion users get the
+ * native instant jump, which is the correct behaviour for them anyway.
+ */
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 body {
@@ -883,38 +890,30 @@ body {
   will-change: transform, opacity, filter;
 }
 
-.intro-video {
+.intro-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  display: block;
   /* Graded a touch cooler and deeper so the ocean footage sits in the same
      world as the near-black page it hands over to. */
   filter: saturate(1.12) contrast(1.06) brightness(0.94);
 }
 
-.intro-grain,
 .intro-vignette,
 .intro-flash {
   position: absolute;
   pointer-events: none;
 }
 
-.intro-grain {
-  inset: 0;
-  opacity: 0.16;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E");
-}
-
-/* Darkens the frame edges toward the page's own ink, so the film reads as part
-   of the site rather than a bright rectangle pasted on top of it. */
+/* Only a whisper of edge shading — enough to seat the film against the page's
+   own ink without putting a dark frame around footage meant to be seen clean. */
 .intro-vignette {
   inset: 0;
   background:
-    radial-gradient(120% 90% at 55% 44%, transparent 38%, rgb(4 7 14 / 0.5) 82%, rgb(4 7 14 / 0.86) 100%),
-    linear-gradient(180deg, rgb(4 7 14 / 0.6), transparent 26%, transparent 62%, rgb(4 7 14 / 0.78));
+    radial-gradient(130% 100% at 55% 44%, transparent 55%, rgb(4 7 14 / 0.3) 88%, rgb(4 7 14 / 0.55) 100%),
+    linear-gradient(180deg, rgb(4 7 14 / 0.3), transparent 20%, transparent 74%, rgb(4 7 14 / 0.42));
 }
 
 .intro-flash {
@@ -928,68 +927,6 @@ body {
     rgb(150 205 255 / 0.38) 44%,
     transparent 70%
   );
-}
-
-.intro-copy {
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  left: 50%;
-  width: min(52rem, 88vw);
-  translate: -50% -54%;
-  text-align: center;
-  will-change: transform, opacity;
-}
-
-.intro-kicker {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.85rem;
-  margin-bottom: 1.5rem;
-  color: rgb(233 246 255 / 0.82);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.36em;
-  text-transform: uppercase;
-  text-shadow: 0 2px 24px rgb(2 8 20 / 0.9);
-}
-
-.intro-kicker span {
-  width: 2.4rem;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--cyan));
-}
-
-.intro-kicker span:last-child { transform: rotate(180deg); }
-
-.intro-title {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(3.6rem, 11vw, 10rem);
-  font-weight: 400;
-  line-height: 0.8;
-  letter-spacing: -0.06em;
-  text-transform: uppercase;
-  text-shadow: 0 18px 80px rgb(2 8 20 / 0.75);
-}
-
-.intro-title span:first-child { color: #f4fbff; }
-
-.intro-title span:last-child {
-  color: transparent;
-  -webkit-text-stroke: 1px rgb(238 250 255 / 0.9);
-}
-
-.intro-sub {
-  margin-top: 1.6rem;
-  color: rgb(226 241 255 / 0.76);
-  font-size: clamp(0.75rem, 1.1vw, 0.95rem);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  text-shadow: 0 2px 20px rgb(2 8 20 / 0.9);
 }
 
 .intro-cue {
@@ -1032,8 +969,16 @@ body {
   z-index: 60;
   overflow: hidden;
   pointer-events: none;
-  opacity: 0.92;
   mix-blend-mode: screen;
+  /* Held back through the opening film — the trail belongs to the site, not to
+     the footage, and rainbow tubes crawling over the crystal read as a bug.
+     It arrives with the montage, on the same cue as the header. */
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+html[data-chrome="on"] .tubes-cursor {
+  opacity: 0.92;
 }
 
 .scroll-rail {
@@ -1303,9 +1248,6 @@ html[data-chrome="on"] .site-header {
 
 @media (max-width: 640px) {
   .intro-scroll { height: 320svh; }
-  .intro-title { font-size: clamp(3rem, 17vw, 6rem); }
-  .intro-kicker { font-size: 0.5rem; letter-spacing: 0.28em; }
-  .intro-sub { font-size: 0.62rem; letter-spacing: 0.16em; }
 }
 
 /* Keyed to the input device rather than the viewport: the trail follows a
@@ -1313,6 +1255,9 @@ html[data-chrome="on"] .site-header {
    full-screen blended canvas is expensive to composite for no payoff. */
 @media (hover: none), (pointer: coarse) {
   .tubes-cursor { display: none; }
+  /* The trail is not there to recolour, so the invitation to click would be
+     pointing at nothing. */
+  .cursor-hint { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

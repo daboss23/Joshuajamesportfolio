@@ -29,7 +29,7 @@ export function CursorHint() {
 
   return (
     <p
-      className={`flex items-center justify-center gap-2 text-xs tracking-wide text-white/55 transition-opacity duration-700 [text-shadow:0_2px_20px_rgba(0,0,0,0.95)] ${
+      className={`cursor-hint flex items-center justify-center gap-2 text-xs tracking-wide text-white/55 transition-opacity duration-700 [text-shadow:0_2px_20px_rgba(0,0,0,0.95)] ${
         dismissed ? "opacity-0" : "opacity-100"
       }`}
       // Hidden from assistive tech once spent, and never focusable — it is a
