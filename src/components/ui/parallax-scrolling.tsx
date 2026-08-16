@@ -1,99 +1,105 @@
 import { useEffect, useRef } from "react";
 import { trackScrollProgress } from "../../lib/scroll-progress";
 
-/**
- * Scroll-driven parallax gallery.
- *
- * The section is deliberately taller than the viewport; a sticky stage pins the
- * artwork while that extra height scrolls past, and each column is translated by
- * its own multiple of the scroll progress so the layers separate in depth.
- *
- * Self-contained: no scroll library, no animation dependency — just the shared
- * `trackScrollProgress` loop, which eases toward the scroll position so the
- * motion stays smooth on trackpads without ever fighting native scrolling.
- */
+const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
-type Column = {
-  /** Translation multiplier. Negative rises, positive sinks; 0 is locked. */
-  speed: number;
-  /** Thumbnail ids drawn from `public/thumbs`. */
-  items: string[];
+const smoothstep = (edge0: number, edge1: number, value: number) => {
+  const x = clamp((value - edge0) / (edge1 - edge0));
+  return x * x * (3 - 2 * x);
 };
 
-const COLUMNS: Column[] = [
-  { speed: -1.15, items: ["px-01", "sunset-diver", "px-06"] },
-  { speed: 0.55, items: ["hue-flow", "px-02", "racket-cloud"] },
-  { speed: -0.7, items: ["px-03", "city-double", "px-07"] },
-  { speed: 1.0, items: ["moon-grade", "px-04", "bird-hand"] },
-  { speed: -0.45, items: ["px-05", "crimson-aura", "px-08"] },
-];
-
+/**
+ * A sticky identity reveal that keeps the original long-form parallax motion
+ * without the thumbnail wall. The portrait, display name and supporting
+ * details travel at different rates, giving the section depth while keeping
+ * the composition editorial and readable.
+ */
 export function ParallaxComponent() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const colRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const headingRef = useRef<HTMLDivElement>(null);
+  const portraitRef = useRef<HTMLImageElement>(null);
+  const copyRef = useRef<HTMLDivElement>(null);
+  const detailsRef = useRef<HTMLDivElement>(null);
+  const cueRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
-    // Resting state is the midpoint: columns unshifted, headline centred.
-    return trackScrollProgress(section, (eased) => {
-      // Signed distance from the midpoint: layers spread apart symmetrically
-      // around the moment the stage is centred, rather than drifting one way.
-      const p = eased - 0.5;
-      const vh = window.innerHeight;
+    return trackScrollProgress(section, (progress) => {
+      const stage = stageRef.current;
+      const portrait = portraitRef.current;
+      const copy = copyRef.current;
+      const details = detailsRef.current;
+      const cue = cueRef.current;
+      if (!stage || !portrait || !copy || !details || !cue) return;
 
-      colRefs.current.forEach((node, i) => {
-        if (!node) return;
-        node.style.transform = `translate3d(0, ${p * COLUMNS[i].speed * vh * 0.9}px, 0)`;
-      });
+      const enter = smoothstep(0.03, 0.22, progress);
+      const exit = 1 - smoothstep(0.76, 0.97, progress);
+      const visible = Math.min(enter, exit);
+      const signed = progress - 0.5;
 
-      if (headingRef.current) {
-        const away = Math.abs(p) * 2; // 0 centred, 1 at either end
-        headingRef.current.style.transform = `translate3d(0, ${p * -vh * 0.25}px, 0) scale(${1 + away * 0.12})`;
-        headingRef.current.style.opacity = String(Math.max(0, 1 - away * 1.15));
-      }
+      portrait.style.cssText = [
+        `opacity:${0.22 + visible * 0.78}`,
+        `transform:translate3d(${signed * -3.5}vw, ${signed * -5}vh, 0) scale(${1.12 - visible * 0.08})`,
+      ].join(";");
 
-      if (stageRef.current) {
-        // Heaviest vignette when the stage is centred, lifting toward the ends.
-        const centred = 1 - Math.min(1, Math.abs(p) * 2);
-        stageRef.current.style.setProperty("--veil", String(0.35 + centred * 0.6));
-      }
+      copy.style.cssText = [
+        `opacity:${visible}`,
+        `transform:translate3d(0, ${signed * -16}vh, 0)`,
+      ].join(";");
+
+      details.style.cssText = [
+        `opacity:${visible}`,
+        `transform:translate3d(0, ${signed * -9}vh, 0)`,
+      ].join(";");
+
+      cue.style.opacity = String(enter * (1 - smoothstep(0.42, 0.62, progress)));
+      stage.style.setProperty("--identity-glow", String(0.35 + visible * 0.65));
     }, { reducedValue: 0.5 });
   }, []);
 
   return (
-    <section ref={sectionRef} className="parallax" aria-label="Parallax showreel">
-      <div ref={stageRef} className="parallax__stage">
-        <div className="parallax__grid" aria-hidden="true">
-          {COLUMNS.map((col, i) => (
-            <div
-              key={i}
-              ref={(node) => {
-                colRefs.current[i] = node;
-              }}
-              className="parallax__col"
-            >
-              {col.items.map((id) => (
-                <div key={id} className="parallax__card">
-                  <img src={`/thumbs/${id}.svg`} alt="" loading="lazy" draggable={false} />
-                </div>
-              ))}
-            </div>
-          ))}
+    <section ref={sectionRef} className="identity-scroll" aria-labelledby="identity-title">
+      <div ref={stageRef} className="identity-stage">
+        <img
+          ref={portraitRef}
+          className="identity-portrait"
+          src="/images/joshua-identity-hero.png"
+          alt="Joshua James in a cinematic studio portrait"
+          decoding="async"
+        />
+        <div className="identity-scrim" aria-hidden="true" />
+        <div className="identity-orbit" aria-hidden="true"><span /><span /></div>
+
+        <div ref={copyRef} className="identity-copy">
+          <p className="identity-kicker"><span />Motion that moves. Stories that stay.<span /></p>
+          <h2 id="identity-title" aria-label="Joshua James">
+            <span>Joshua</span>
+            <span>James</span>
+          </h2>
+          <p className="identity-role">Motion designer / visual storyteller</p>
+          <p className="identity-intro">
+            I shape raw ideas into sharp, cinematic work built to hold attention
+            and leave a feeling behind.
+          </p>
+          <div className="identity-actions">
+            <a className="identity-primary" href="#selected-work">View my work <span>↗</span></a>
+            <a className="identity-secondary" href="#contact">Let’s talk <span>+</span></a>
+          </div>
         </div>
 
-        <div className="parallax__veil" />
+        <div ref={detailsRef} className="identity-details">
+          <div className="identity-socials" aria-label="Social links">
+            <a href="https://www.behance.net/" target="_blank" rel="noreferrer" aria-label="Behance">Be</a>
+            <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" aria-label="LinkedIn">in</a>
+            <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram">ig</a>
+          </div>
+          <p><span className="availability-dot" />Available for select projects</p>
+        </div>
 
-        <div ref={headingRef} className="parallax__heading">
-          <p className="parallax__eyebrow">Keep scrolling</p>
-          <h2 className="parallax__title">
-            Every frame
-            <br />
-            earns its cut.
-          </h2>
+        <div ref={cueRef} className="identity-scroll-cue" aria-hidden="true">
+          <span>Scroll to reveal</span><i />
         </div>
       </div>
     </section>

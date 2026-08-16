@@ -77,7 +77,7 @@ export function PortfolioSections() {
     const data = new FormData(event.currentTarget);
     const subject = encodeURIComponent(`Project enquiry — ${data.get("project") || "new project"}`);
     const body = encodeURIComponent(
-      `Name: ${data.get("name")}\nEmail: ${data.get("email")}\n\n${data.get("message")}`,
+      `Name: ${data.get("name")}\nEmail: ${data.get("email")}\nProject: ${data.get("project")}\nBudget: ${data.get("budget")}\n\n${data.get("message")}`,
     );
     window.location.href = `mailto:mindblastmarketing@gmail.com?subject=${subject}&body=${body}`;
   };
@@ -194,29 +194,60 @@ export function PortfolioSections() {
         </div>
       </section>
 
-      <section id="contact" className="portfolio-section contact-section reveal">
-        <img className="contact-art" src="/images/contact-portal.png" alt="A figure approaching a luminous violet and cyan portal" loading="lazy" decoding="async" />
-        <div className="contact-scrim" />
-        <div className="contact-copy">
-          <p className="section-kicker section-kicker--left"><span />Let’s make something</p>
-          <h2>Have a project<br />in mind?</h2>
-          <p>Tell me what you’re building. I’ll bring the cut, movement and finish that makes it land.</p>
-          <a href="mailto:mindblastmarketing@gmail.com">mindblastmarketing@gmail.com</a>
-        </div>
-        <form className="glass-panel contact-form" onSubmit={sendMessage}>
-          <label><span>Your name</span><input name="name" required placeholder="Name" /></label>
-          <label><span>Email address</span><input name="email" type="email" required placeholder="you@company.com" /></label>
-          <label className="field-wide"><span>Project type</span><input name="project" placeholder="Campaign, reel, motion system…" /></label>
-          <label className="field-wide"><span>Tell me about it</span><textarea name="message" required placeholder="A quick outline of the project, timing and budget." /></label>
-          <button className="liquid-button field-wide" type="submit"><span>Send enquiry</span><span>↗</span></button>
-        </form>
-      </section>
+      <footer id="contact" className="portfolio-contact">
+        <section className="contact-section reveal" aria-labelledby="contact-title">
+          <div className="contact-copy">
+            <p className="section-kicker section-kicker--left"><span />Let’s work together</p>
+            <h2 id="contact-title">Have a project<br />in mind?</h2>
+            <p>Let’s create something extraordinary. Tell me where you want to take it and I’ll bring the cut, movement and finish.</p>
 
-      <div className="portfolio-footer">
-        <a href="#top" className="footer-brand">Joshua James<span>Motion &amp; edit</span></a>
-        <p>© {new Date().getFullYear()} Joshua James. All rights reserved.</p>
-        <div><a href="#selected-work">Work</a><a href="#about">About</a><a href="#contact">Contact</a></div>
-      </div>
+            <div className="contact-details">
+              <a href="mailto:mindblastmarketing@gmail.com"><span aria-hidden="true">✉</span><span><small>Email</small>mindblastmarketing@gmail.com</span></a>
+              <div><span aria-hidden="true">⌖</span><span><small>Based in</small>Sydney, Australia — working worldwide</span></div>
+            </div>
+
+            <div className="contact-socials" aria-label="Social profiles">
+              <a href="https://www.behance.net/" target="_blank" rel="noreferrer" aria-label="Behance">Be</a>
+              <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" aria-label="LinkedIn">in</a>
+              <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram">ig</a>
+              <a href="https://www.youtube.com/" target="_blank" rel="noreferrer" aria-label="YouTube">yt</a>
+            </div>
+          </div>
+
+          <form className="contact-form" onSubmit={sendMessage}>
+            <label><span>Your name</span><input name="name" required autoComplete="name" placeholder="Name" /></label>
+            <label><span>Email address</span><input name="email" type="email" required autoComplete="email" placeholder="you@company.com" /></label>
+            <label>
+              <span>Project type</span>
+              <select name="project" defaultValue="">
+                <option value="" disabled>Select a project</option>
+                <option>Short-form edit</option><option>Motion design</option><option>Social campaign</option><option>Creative direction</option><option>Other</option>
+              </select>
+            </label>
+            <label>
+              <span>Budget range</span>
+              <select name="budget" defaultValue="">
+                <option value="" disabled>Select a range</option>
+                <option>Under $2k</option><option>$2k–$5k</option><option>$5k–$10k</option><option>$10k+</option>
+              </select>
+            </label>
+            <label className="field-wide"><span>Tell me about your project</span><textarea name="message" required placeholder="A quick outline of the idea, timing and what success looks like." /></label>
+            <button className="liquid-button field-wide" type="submit"><span>Send message</span><span>↗</span></button>
+          </form>
+
+          <div className="contact-visual" aria-hidden="true">
+            <img src="/images/contact-portal.png" alt="" loading="lazy" decoding="async" />
+            <div className="contact-visual-glow" />
+            <p><span />Ideas become motion</p>
+          </div>
+        </section>
+
+        <div className="portfolio-footer">
+          <a href="#top" className="footer-brand">Joshua James<span>Motion &amp; edit</span></a>
+          <p>© {new Date().getFullYear()} Joshua James. All rights reserved.</p>
+          <div><a href="#selected-work">Work</a><a href="#about">About</a><a href="#services">Services</a><a href="#top">Back to top ↑</a></div>
+        </div>
+      </footer>
     </div>
   );
 }
