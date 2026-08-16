@@ -1,5 +1,7 @@
 import { useCallback, useState } from "react";
+import { CrystalIntro } from "./components/CrystalIntro";
 import { CursorHint } from "./components/CursorHint";
+import { ScrollProgress } from "./components/ScrollProgress";
 import { ReelLightbox } from "./components/ReelLightbox";
 import { ScrollShowcase } from "./components/ScrollShowcase";
 import { PortfolioSections } from "./components/PortfolioSections";
@@ -20,6 +22,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-ink">
       <TubesCursor />
+      <ScrollProgress />
 
       <header className="site-header fixed inset-x-0 top-0 z-40 flex items-center justify-between px-6 py-5 sm:px-10">
         <a href="#top" className="site-logo text-sm font-semibold tracking-tight text-white">
@@ -34,14 +37,18 @@ export default function App() {
       </header>
 
       <main id="top" className="relative z-[1]">
+        <CrystalIntro />
+
         <ScrollShowcase reels={REELS} onSelect={open}>
           <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-24 text-center sm:py-28">
             <div className="px-6">
-              <h1 className="text-balance text-4xl font-medium tracking-tight text-white [text-shadow:0_2px_30px_rgba(0,0,0,0.95)] sm:text-6xl">
+              {/* The opening title sequence now carries the page's h1, so this
+                  steps down to a section heading rather than competing with it. */}
+              <h2 className="text-balance text-4xl font-medium tracking-tight text-white [text-shadow:0_2px_30px_rgba(0,0,0,0.95)] sm:text-6xl">
                 Short-form video,
                 <br />
                 front and centre.
-              </h1>
+              </h2>
             </div>
             <div className="flex flex-col items-center gap-3 px-6">
               <p className="max-w-md text-balance text-sm text-white/70 [text-shadow:0_2px_20px_rgba(0,0,0,0.95)]">

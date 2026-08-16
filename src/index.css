@@ -24,14 +24,49 @@ body {
 
 .showcase {
   position: relative;
+  /*
+   * Pulled up a full screen so the hero is already pinned and painted while the
+   * opening film is still on top of it. The film's last act is a push-in that
+   * blows out to white, and it dissolves to reveal this — with the overlap
+   * there is no frame in which neither section is on screen, which is the
+   * whole trick behind the two reading as one continuous shot.
+   */
+  margin-top: -200svh;
+
+  /*
+   * A backdrop that outlives the hero.
+   *
+   * The hero's own atmosphere lives on the pin and therefore fades out with
+   * it, which left roughly a screen of flat black between the corridor
+   * dimming and the identity portrait rising into view. This sits behind both
+   * and carries the crystal's blue down until the identity section's own
+   * background takes over, so the two never meet across a dead gap.
+   */
+  background:
+    radial-gradient(70% 40% at 50% 46%, rgb(94 132 255 / 0.1), transparent 70%),
+    linear-gradient(180deg, #0a1c33 0%, #081428 20%, #060a18 46%, #05060f 72%, #04050a 100%);
+}
+
+/* The anchor still means "the top of the hero", not the top of the overlap. */
+#work {
+  scroll-margin-top: 200svh;
 }
 
 /* The extra height past one screen is how far the hero recedes before the
-   parallax takes over. */
+   parallax takes over. The first screen of that budget is spent underneath the
+   opening film — see the negative margin above — so this carries an extra
+   200svh purely to pay for the overlap; without it the hero would start
+   receding the instant the bloom cleared and never get a beat of its own.
+
+   The overlap is two screens rather than one so that the hero is already
+   pinned flush to the top of the viewport before the bloom starts. At one
+   screen it was still sliding up during the flash, leaving a strip of bare
+   page background above it — a hard black edge across the brightest frame of
+   the handoff. */
 .showcase__hero {
   position: relative;
   z-index: 1;
-  height: 185svh;
+  height: 400svh;
 }
 
 .showcase__pin {
@@ -40,6 +75,40 @@ body {
   height: 100svh;
   transform-origin: 50% 45%;
   will-change: transform, opacity, filter;
+}
+
+/*
+ * What the bloom resolves into.
+ *
+ * Left on the page's flat black, the handoff went white and then dropped into
+ * an empty dark room — the reel corridor's panels are small and dim as they
+ * are born at the vanishing point, so there was nothing to land on. This
+ * carries the crystal's own blue out of the film and lets it decay into the
+ * site's ink, which is what makes the cut feel like a continuation of the shot
+ * rather than the end of one.
+ */
+.showcase__pin::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    radial-gradient(115% 85% at 55% 40%, rgb(116 186 255 / 0.3), transparent 62%),
+    radial-gradient(90% 75% at 18% 92%, rgb(139 93 255 / 0.2), transparent 66%),
+    radial-gradient(80% 70% at 88% 78%, rgb(243 84 207 / 0.14), transparent 66%),
+    linear-gradient(180deg, #08192e 0%, #070b1a 46%, #05060d 100%);
+}
+
+/* A soft horizon under the corridor, so the panels sit in the space instead of
+   floating over a gradient. */
+.showcase__pin::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: auto 0 0;
+  height: 46%;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgb(4 5 12 / 0.85));
 }
 
 /* ---------------------------------------------------------- identity scroll */
@@ -786,6 +855,466 @@ body {
   .portfolio-footer > p { order: 3; }
 }
 
+/* ============================================================ opening film */
+
+/*
+ * Deliberately transparent. The section outlives its own stage: it stays
+ * stacked above the hero for the whole overlap, so an opaque background here
+ * would keep covering the hero long after the film itself had faded out —
+ * which is exactly the black hole this used to hand over to. Only the stage,
+ * which does fade, is allowed to paint.
+ */
+.intro-scroll {
+  position: relative;
+  z-index: 3;
+  height: 400svh;
+}
+
+.intro-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  background: #04070e;
+  /* The crystal the camera flies into sits here, so the push-in and the bloom
+     both have to grow out of this point rather than the geometric centre. */
+  transform-origin: 55% 44%;
+  will-change: transform, opacity, filter;
+}
+
+.intro-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Graded a touch cooler and deeper so the ocean footage sits in the same
+     world as the near-black page it hands over to. */
+  filter: saturate(1.12) contrast(1.06) brightness(0.94);
+}
+
+.intro-grain,
+.intro-vignette,
+.intro-flash {
+  position: absolute;
+  pointer-events: none;
+}
+
+.intro-grain {
+  inset: 0;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E");
+}
+
+/* Darkens the frame edges toward the page's own ink, so the film reads as part
+   of the site rather than a bright rectangle pasted on top of it. */
+.intro-vignette {
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 55% 44%, transparent 38%, rgb(4 7 14 / 0.5) 82%, rgb(4 7 14 / 0.86) 100%),
+    linear-gradient(180deg, rgb(4 7 14 / 0.6), transparent 26%, transparent 62%, rgb(4 7 14 / 0.78));
+}
+
+.intro-flash {
+  inset: -20%;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    circle at 55% 44%,
+    #ffffff 0%,
+    rgb(219 240 255 / 0.92) 20%,
+    rgb(150 205 255 / 0.38) 44%,
+    transparent 70%
+  );
+}
+
+.intro-copy {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: min(52rem, 88vw);
+  translate: -50% -54%;
+  text-align: center;
+  will-change: transform, opacity;
+}
+
+.intro-kicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+  color: rgb(233 246 255 / 0.82);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 24px rgb(2 8 20 / 0.9);
+}
+
+.intro-kicker span {
+  width: 2.4rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan));
+}
+
+.intro-kicker span:last-child { transform: rotate(180deg); }
+
+.intro-title {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3.6rem, 11vw, 10rem);
+  font-weight: 400;
+  line-height: 0.8;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 18px 80px rgb(2 8 20 / 0.75);
+}
+
+.intro-title span:first-child { color: #f4fbff; }
+
+.intro-title span:last-child {
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(238 250 255 / 0.9);
+}
+
+.intro-sub {
+  margin-top: 1.6rem;
+  color: rgb(226 241 255 / 0.76);
+  font-size: clamp(0.75rem, 1.1vw, 0.95rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 20px rgb(2 8 20 / 0.9);
+}
+
+.intro-cue {
+  position: absolute;
+  z-index: 2;
+  bottom: 2.2rem;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  translate: -50% 0;
+}
+
+.intro-cue span {
+  color: rgb(255 255 255 / 0.7);
+  font-size: 0.52rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 16px rgb(2 8 20 / 0.9);
+}
+
+.intro-cue i {
+  width: 1px;
+  height: 2.8rem;
+  background: linear-gradient(var(--cyan), transparent);
+  animation: scrollCue 1.8s ease-in-out infinite;
+}
+
+/* ====================================================== site-wide chrome */
+
+/*
+ * The cursor trail. Fixed above every section and blended, so it is one
+ * continuous effect across the whole page instead of something that only
+ * shows through wherever a background happens to be transparent.
+ */
+.tubes-cursor {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.92;
+  mix-blend-mode: screen;
+}
+
+.scroll-rail {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 70;
+  height: 2px;
+  pointer-events: none;
+  background: rgb(255 255 255 / 0.06);
+}
+
+.scroll-rail__fill {
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: var(--spectrum);
+  background-size: 220% 100%;
+  box-shadow: 0 0 14px rgb(139 93 255 / 0.7);
+  animation: spectrumDrift 9s linear infinite;
+}
+
+/* The header stays out of the title sequence and drops in with the hero.
+   Hidden by default rather than revealed by an "off" state, so it cannot flash
+   on screen in the frame before the intro's first measurement lands. */
+.site-header {
+  opacity: 0;
+  transform: translateY(-140%);
+  pointer-events: none;
+  transition: opacity 700ms ease, transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-chrome="on"] .site-header {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* ============================================================ colour pass */
+
+:root {
+  --lime: #8ef5b0;
+  --spectrum: linear-gradient(
+    90deg,
+    #55e6ff,
+    #8b5dff,
+    #f354cf,
+    #e5ae6c,
+    #8ef5b0,
+    #55e6ff
+  );
+}
+
+::selection {
+  background: rgb(139 93 255 / 0.45);
+  color: #fff;
+}
+
+/* A living aurora behind the whole lower page — slow enough to register as
+   atmosphere rather than as an animation competing with the content. */
+.portfolio-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background:
+    radial-gradient(38rem 28rem at 12% 12%, rgb(85 230 255 / 0.13), transparent 70%),
+    radial-gradient(42rem 30rem at 88% 38%, rgb(243 84 207 / 0.12), transparent 70%),
+    radial-gradient(36rem 26rem at 30% 74%, rgb(139 93 255 / 0.14), transparent 70%),
+    radial-gradient(30rem 24rem at 78% 92%, rgb(142 245 176 / 0.09), transparent 70%);
+  animation: auroraDrift 26s ease-in-out infinite alternate;
+}
+
+/* Lifts the content clear of the aurora layer, which is a pseudo-element and so
+   paints above the shell's ordinary flow children. */
+.portfolio-section {
+  z-index: 1;
+}
+
+.ambient-orb {
+  opacity: 0.16;
+  animation: orbFloat 18s ease-in-out infinite alternate;
+}
+
+.ambient-orb--two { animation-duration: 23s; animation-direction: alternate-reverse; }
+
+.section-kicker > span {
+  background: var(--spectrum);
+  background-size: 300% 100%;
+  animation: spectrumDrift 7s linear infinite;
+}
+
+/* Headline accents ride the same spectrum as the rail, so the colour reads as
+   one system rather than a per-section decision. */
+.about-title em,
+.contact-copy h2 em {
+  background: var(--spectrum);
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 0;
+  color: transparent;
+  text-shadow: none;
+  animation: spectrumDrift 8s linear infinite;
+}
+
+/* A pointer-tracked highlight on every glass panel. `--mx`/`--my` are written
+   by PortfolioSections; the fallback keeps the sheen centred before the
+   pointer has ever been over the card (and on touch, where it never is). */
+.glass-panel::before {
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 0%),
+    rgb(124 229 255 / 0.16),
+    rgb(139 93 255 / 0.08) 40%,
+    transparent 62%
+  );
+  transition: opacity 300ms ease;
+}
+
+.service-card {
+  overflow: hidden;
+}
+
+/* Spectrum edge that lights up as a card is picked out. */
+.service-card::after,
+.quote-card::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  border-radius: inherit;
+  background: var(--spectrum);
+  background-size: 260% 100%;
+  opacity: 0;
+  transition: opacity 320ms ease;
+  animation: spectrumDrift 6s linear infinite;
+}
+
+.service-card:hover::after,
+.quote-card:hover::after { opacity: 0.95; }
+
+.service-card:hover {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    0 30px 80px rgb(0 0 0 / 0.35),
+    0 0 60px rgb(139 93 255 / 0.16);
+}
+
+.service-icon {
+  transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 320ms ease;
+}
+
+.service-card:hover .service-icon {
+  transform: translateY(-3px) rotate(-6deg);
+  box-shadow: 0 0 34px rgb(85 230 255 / 0.4), inset 0 1px rgb(255 255 255 / 0.28);
+}
+
+.project-number {
+  background: linear-gradient(135deg, rgb(85 230 255 / 0.28), rgb(243 84 207 / 0.24));
+  color: #fff;
+}
+
+.project-card { transition: box-shadow 400ms ease, border-color 400ms ease; }
+
+.project-card:hover {
+  border-color: rgb(243 84 207 / 0.4);
+  box-shadow: 0 30px 90px rgb(0 0 0 / 0.45), 0 0 70px rgb(139 93 255 / 0.18);
+}
+
+.project-meta p { color: transparent; background: var(--spectrum); background-size: 260% 100%; -webkit-background-clip: text; background-clip: text; animation: spectrumDrift 7s linear infinite; }
+
+/* Each glyph a step further along the spectrum, so the marquee carries colour
+   through what was a monochrome band. */
+.tool-glyph { transition: transform 300ms ease, box-shadow 300ms ease; }
+.tool-item:nth-child(6n + 1) .tool-glyph { color: #55e6ff; border-color: rgb(85 230 255 / 0.38); }
+.tool-item:nth-child(6n + 2) .tool-glyph { color: #8b5dff; border-color: rgb(139 93 255 / 0.38); }
+.tool-item:nth-child(6n + 3) .tool-glyph { color: #f354cf; border-color: rgb(243 84 207 / 0.38); }
+.tool-item:nth-child(6n + 4) .tool-glyph { color: #e5ae6c; border-color: rgb(229 174 108 / 0.38); }
+.tool-item:nth-child(6n + 5) .tool-glyph { color: #8ef5b0; border-color: rgb(142 245 176 / 0.38); }
+.tool-item:nth-child(6n) .tool-glyph { color: #ff8f6b; border-color: rgb(255 143 107 / 0.38); }
+.tool-item:hover .tool-glyph { transform: translateY(-3px) scale(1.06); box-shadow: 0 0 26px currentColor; }
+
+.process-dot::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1px solid rgb(139 93 255 / 0.3);
+  animation: processPing 3.2s ease-out infinite;
+}
+
+.process-step:nth-child(2) .process-dot::after { animation-delay: 0.4s; }
+.process-step:nth-child(3) .process-dot::after { animation-delay: 0.8s; }
+.process-step:nth-child(4) .process-dot::after { animation-delay: 1.2s; }
+.process-step:nth-child(5) .process-dot::after { animation-delay: 1.6s; }
+
+.stats-stack strong {
+  background: var(--spectrum);
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: spectrumDrift 9s linear infinite;
+  font-variant-numeric: tabular-nums;
+}
+
+.liquid-button {
+  position: relative;
+  border-color: rgb(255 255 255 / 0.22);
+  background: var(--spectrum);
+  background-size: 260% 100%;
+  color: #0a0710;
+  animation: spectrumDrift 6s linear infinite;
+}
+
+.liquid-button:hover { filter: brightness(1.15) saturate(1.1); }
+
+.contact-socials a:hover,
+.identity-socials a:hover {
+  border-color: rgb(139 93 255 / 0.7);
+  color: #fff;
+  box-shadow: 0 0 24px rgb(139 93 255 / 0.35);
+}
+
+.header-cta {
+  background: linear-gradient(100deg, rgb(85 230 255 / 0.22), rgb(243 84 207 / 0.22));
+  transition: box-shadow 260ms ease, transform 260ms ease;
+}
+
+.header-cta:hover { transform: translateY(-1px); box-shadow: 0 0 28px rgb(139 93 255 / 0.4); }
+
+.header-nav a:not(.header-cta) {
+  position: relative;
+}
+
+.header-nav a:not(.header-cta)::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -6px;
+  height: 1px;
+  background: var(--spectrum);
+  background-size: 260% 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.header-nav a:not(.header-cta):hover::after { transform: scaleX(1); }
+
+@keyframes spectrumDrift { to { background-position: 200% 50%; } }
+
+@keyframes auroraDrift {
+  from { transform: translate3d(-2%, -1%, 0) scale(1); }
+  to { transform: translate3d(2%, 2%, 0) scale(1.08); }
+}
+
+@keyframes orbFloat {
+  from { transform: translate3d(0, 0, 0) scale(1); opacity: 0.12; }
+  to { transform: translate3d(3rem, -4rem, 0) scale(1.2); opacity: 0.22; }
+}
+
+@keyframes processPing {
+  0% { opacity: 0.7; transform: scale(0.9); }
+  70%, 100% { opacity: 0; transform: scale(1.55); }
+}
+
+@media (max-width: 640px) {
+  .intro-scroll { height: 320svh; }
+  .intro-title { font-size: clamp(3rem, 17vw, 6rem); }
+  .intro-kicker { font-size: 0.5rem; letter-spacing: 0.28em; }
+  .intro-sub { font-size: 0.62rem; letter-spacing: 0.16em; }
+}
+
+/* Keyed to the input device rather than the viewport: the trail follows a
+   cursor, so on a touch screen there is nothing for it to follow — and a
+   full-screen blended canvas is expensive to composite for no payoff. */
+@media (hover: none), (pointer: coarse) {
+  .tubes-cursor { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /*
    * Collapse the scroll budget so each stage is exactly one screen and nothing
@@ -793,17 +1322,36 @@ body {
    * `static`: their absolutely-positioned children would otherwise escape and
    * resolve against the showcase, spilling the columns over the hero.
    */
-  .identity-scroll {
+  .identity-scroll,
+  .intro-scroll {
     height: 100svh;
   }
 
   .identity-stage,
+  .intro-stage,
   .showcase__pin {
     position: relative;
   }
 
   .showcase__hero {
     height: 100svh;
+  }
+
+  /* Nothing is scrubbing the film or blowing it out, so the two sections have
+     to sit end to end instead of overlapping — otherwise the hero would be
+     hidden underneath a frozen first frame. */
+  .showcase {
+    margin-top: 0;
+  }
+
+  #work {
+    scroll-margin-top: 0;
+  }
+
+  .intro-stage {
+    transform: none;
+    filter: none;
+    opacity: 1;
   }
 
   *,

@@ -89,8 +89,16 @@ export default function TubesCursor() {
    * shrink into a fraction of the viewport. Pinning the wrapper to the viewport
    * means the measurement is one screen, whatever the page height.
    */
+  /*
+   * `screen` blending is what lets one canvas serve the whole site. Painted
+   * behind the page it was invisible the moment a section had a background of
+   * its own; painted on top it would grey everything out, because the renderer
+   * clears to black. Screen maps that black to a no-op and leaves only the
+   * light, so the trail trails over the film, the hero and every panel below
+   * without touching their colour.
+   */
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+    <div className="tubes-cursor" aria-hidden="true">
       <canvas ref={canvasRef} />
     </div>
   );

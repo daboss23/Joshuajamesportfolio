@@ -1,4 +1,4 @@
-import { useEffect, useRef, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 
 const SERVICES = [
   ["01", "Short-form edits", "Scroll-stopping cuts shaped around the hook, the beat and the second watch."],
@@ -26,11 +26,70 @@ const PROCESS = [
   ["05", "Release", "Mastered, versioned and ready to land natively on every platform."],
 ] as const;
 
+const STATS = [
+  { value: 7, suffix: "+", label: "years shaping stories" },
+  { value: 150, suffix: "+", label: "projects shipped" },
+  { value: 12, suffix: "m+", label: "organic views" },
+  { value: 24, suffix: "", label: "repeat partners" },
+] as const;
+
 const TESTIMONIALS = [
   ["Joshua found the pace we had been trying to describe in the very first cut. The final campaign felt unmistakably ours.", "Maya Chen", "Brand Director"],
   ["An editor with taste, but also the rare ability to make the process calm. Every decision had a reason behind it.", "Theo Martin", "Creative Producer"],
   ["Our strongest performing reel this year — and the one people kept sending back to us. That says everything.", "Sasha Reid", "Social Lead"],
 ] as const;
+
+/**
+ * Counts up to its value the first time it is scrolled into view, then stays
+ * put — a number that re-rolls every time it passes the viewport reads as a
+ * broken widget rather than a flourish.
+ */
+function CountUp({ value, suffix }: { value: number; suffix: string }) {
+  const ref = useRef<HTMLElement>(null);
+  const [shown, setShown] = useState(0);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setShown(value);
+      return;
+    }
+
+    let frame = 0;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+
+        const start = performance.now();
+        const tick = (now: number) => {
+          const t = Math.min(1, (now - start) / 1400);
+          // Ease-out quint: most of the distance early, so it lands rather
+          // than crawls the last few digits.
+          setShown(Math.round(value * (1 - Math.pow(1 - t, 5))));
+          if (t < 1) frame = requestAnimationFrame(tick);
+        };
+        frame = requestAnimationFrame(tick);
+      },
+      { threshold: 0.5 },
+    );
+
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [value]);
+
+  return (
+    <strong ref={ref}>
+      {shown}
+      {suffix}
+    </strong>
+  );
+}
 
 function Icon({ children }: { children: ReactNode }) {
   return <span className="service-icon" aria-hidden="true">{children}</span>;
@@ -67,8 +126,41 @@ export function PortfolioSections() {
 
     root.querySelectorAll(".reveal").forEach((node) => observer.observe(node));
 
+    /**
+     * Moves each glass panel's sheen to sit under the pointer. One delegated
+     * listener rather than a handler per card, and the write is deferred to the
+     * next frame so a fast sweep across a grid of cards costs one style flush
+     * instead of one per pointer event.
+     */
+    let queued: HTMLElement | null = null;
+    let point = { x: 50, y: 0 };
+    let frame = 0;
+
+    const paint = () => {
+      frame = 0;
+      if (!queued) return;
+      queued.style.setProperty("--mx", `${point.x}%`);
+      queued.style.setProperty("--my", `${point.y}%`);
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      const panel = (event.target as HTMLElement | null)?.closest<HTMLElement>(".glass-panel");
+      if (!panel) return;
+      const rect = panel.getBoundingClientRect();
+      queued = panel;
+      point = {
+        x: ((event.clientX - rect.left) / rect.width) * 100,
+        y: ((event.clientY - rect.top) / rect.height) * 100,
+      };
+      if (!frame) frame = requestAnimationFrame(paint);
+    };
+
+    root.addEventListener("pointermove", onPointerMove, { passive: true });
+
     return () => {
       observer.disconnect();
+      root.removeEventListener("pointermove", onPointerMove);
+      cancelAnimationFrame(frame);
     };
   }, []);
 
@@ -112,10 +204,12 @@ export function PortfolioSections() {
         </div>
 
         <div className="stats-stack reveal" aria-label="Experience statistics">
-          <div><strong>7+</strong><span>years shaping stories</span></div>
-          <div><strong>150+</strong><span>projects shipped</span></div>
-          <div><strong>12m+</strong><span>organic views</span></div>
-          <div><strong>24</strong><span>repeat partners</span></div>
+          {STATS.map((stat) => (
+            <div key={stat.label}>
+              <CountUp value={stat.value} suffix={stat.suffix} />
+              <span>{stat.label}</span>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -198,7 +292,7 @@ export function PortfolioSections() {
         <section className="contact-section reveal" aria-labelledby="contact-title">
           <div className="contact-copy">
             <p className="section-kicker section-kicker--left"><span />Let’s work together</p>
-            <h2 id="contact-title">Have a project<br />in mind?</h2>
+            <h2 id="contact-title">Have a project<br /><em>in mind?</em></h2>
             <p>Let’s create something extraordinary. Tell me where you want to take it and I’ll bring the cut, movement and finish.</p>
 
             <div className="contact-details">
