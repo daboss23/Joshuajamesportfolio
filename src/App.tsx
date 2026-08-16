@@ -1,8 +1,9 @@
 import { useCallback, useState } from "react";
-import { ImageStreamHero } from "./components/ImageStreamHero";
-import { ReelGrid } from "./components/ReelGrid";
+import { CursorHint } from "./components/CursorHint";
 import { ReelLightbox } from "./components/ReelLightbox";
-import { TubesCursor } from "./components/TubesCursor";
+import { ScrollShowcase } from "./components/ScrollShowcase";
+import { PortfolioSections } from "./components/PortfolioSections";
+import TubesCursor from "./components/ui/tubes-cursor";
 import { REELS, type Reel } from "./data/reels";
 
 export default function App() {
@@ -20,68 +21,39 @@ export default function App() {
     <div className="min-h-screen bg-ink">
       <TubesCursor />
 
-      <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-between px-6 py-5 mix-blend-difference sm:px-10">
-        <a href="#top" className="text-sm font-semibold tracking-tight text-white">
-          Joshua James
+      <header className="site-header fixed inset-x-0 top-0 z-40 flex items-center justify-between px-6 py-5 sm:px-10">
+        <a href="#top" className="site-logo text-sm font-semibold tracking-tight text-white">
+          Joshua James <span>Motion &amp; edit</span>
         </a>
-        <nav className="flex items-center gap-6 text-sm text-white/80">
-          <a href="#work" className="hover:text-white">Work</a>
+        <nav className="header-nav flex items-center gap-6 text-sm text-white/80">
+          <a href="#selected-work" className="hover:text-white">Work</a>
+          <a href="#services" className="hover:text-white">Services</a>
           <a href="#about" className="hover:text-white">About</a>
-          <a href="#contact" className="hover:text-white">Contact</a>
+          <a href="#contact" className="header-cta">Let’s talk <span>↗</span></a>
         </nav>
       </header>
 
       <main id="top" className="relative z-[1]">
-        <ImageStreamHero
-          reels={REELS}
-          onSelect={open}
-          className="h-[100svh] w-full"
-        >
+        <ScrollShowcase reels={REELS} onSelect={open}>
           <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-24 text-center sm:py-28">
             <div className="px-6">
-              <h1 className="text-balance text-4xl font-medium tracking-tight text-white sm:text-6xl">
+              <h1 className="text-balance text-4xl font-medium tracking-tight text-white [text-shadow:0_2px_30px_rgba(0,0,0,0.95)] sm:text-6xl">
                 Short-form video,
                 <br />
                 front and centre.
               </h1>
             </div>
-            <p className="max-w-md text-balance px-6 text-sm text-white/60">
-              Tap any frame to play it — or scroll down for the full shelf.
-            </p>
+            <div className="flex flex-col items-center gap-3 px-6">
+              <p className="max-w-md text-balance text-sm text-white/70 [text-shadow:0_2px_20px_rgba(0,0,0,0.95)]">
+                Tap any frame to play it — or keep scrolling.
+              </p>
+              <CursorHint />
+            </div>
           </div>
-        </ImageStreamHero>
+        </ScrollShowcase>
 
-        <section id="work" className="mx-auto max-w-6xl px-6 py-24 sm:px-10">
-          <div className="mb-10 flex items-end justify-between gap-6">
-            <h2 className="text-2xl font-medium tracking-tight sm:text-3xl">Selected work</h2>
-            <p className="hidden text-sm text-mute sm:block">{REELS.length} reels</p>
-          </div>
-          <ReelGrid reels={REELS} onSelect={open} />
-        </section>
-
-        <section id="about" className="mx-auto max-w-3xl px-6 py-24 sm:px-10">
-          <h2 className="mb-6 text-2xl font-medium tracking-tight sm:text-3xl">About</h2>
-          <p className="text-lg leading-relaxed text-mute">
-            I make short-form video that earns the second watch — hooks, pacing,
-            colour and sound design for brands that live on TikTok, Reels and
-            Shorts. Editing, motion and grade handled end to end.
-          </p>
-        </section>
-
-        <section id="contact" className="mx-auto max-w-3xl px-6 pb-32 sm:px-10">
-          <h2 className="mb-6 text-2xl font-medium tracking-tight sm:text-3xl">Contact</h2>
-          <a
-            href="mailto:mindblastmarketing@gmail.com"
-            className="inline-block rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition-opacity hover:opacity-85"
-          >
-            mindblastmarketing@gmail.com
-          </a>
-        </section>
+        <PortfolioSections />
       </main>
-
-      <footer className="relative z-[1] border-t border-white/10 px-6 py-8 text-center text-xs text-mute sm:px-10">
-        © {new Date().getFullYear()} Joshua James
-      </footer>
 
       <ReelLightbox
         reel={activeIndex === null ? null : REELS[activeIndex]}
