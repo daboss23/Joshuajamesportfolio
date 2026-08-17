@@ -38,13 +38,8 @@ export default function App() {
         </nav>
       </header>
 
-      {/*
-        No `z-index` here on purpose. Giving `main` one makes it a stacking
-        context, which traps every section below the cursor trail's layer no
-        matter what z-index a section asks for — and the identity section needs
-        to sit above it. `relative` alone does not create one.
-      */}
-      <main id="top" className="relative">
+      {/* Above the cursor trail's layer, so no section can be painted over. */}
+      <main id="top" className="relative z-[1]">
         <ScrollShowcase reels={REELS} onSelect={open}>
           <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-24 text-center sm:py-28">
             <div className="px-6">

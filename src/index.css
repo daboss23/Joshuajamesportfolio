@@ -29,21 +29,16 @@ body {
 
 /* ---------------------------------------------------------------- showcase */
 
+/*
+ * Transparent, like every section on the page.
+ *
+ * The page is black, and the only thing painted behind the content is the
+ * cursor trail. Sections that carry their own opaque fill would hide it, so
+ * the black comes from the document background once and the sections let it
+ * through.
+ */
 .showcase {
   position: relative;
-
-  /*
-   * A backdrop that outlives the hero.
-   *
-   * The hero's own atmosphere lives on the pin and therefore fades out with
-   * it, which left roughly a screen of flat black between the corridor
-   * dimming and the identity portrait rising into view. This sits behind both
-   * and carries the blue down until the identity section's own background
-   * takes over, so the two never meet across a dead gap.
-   */
-  background:
-    radial-gradient(70% 40% at 50% 46%, rgb(94 132 255 / 0.1), transparent 70%),
-    linear-gradient(180deg, #0a1c33 0%, #081428 20%, #060a18 46%, #05060f 72%, #04050a 100%);
 }
 
 /* The extra height past one screen is how far the hero recedes before the
@@ -62,55 +57,12 @@ body {
   will-change: transform, opacity, filter;
 }
 
-/*
- * The space the corridor sits in.
- *
- * On the page's flat black the reel panels had nothing to be born out of —
- * they are small and dim at the vanishing point, so the top of the page read
- * as an empty dark room. This gives the corridor some depth to travel
- * through, and decays into the site's ink as the hero recedes.
- */
-.showcase__pin::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  background:
-    radial-gradient(115% 85% at 55% 40%, rgb(116 186 255 / 0.3), transparent 62%),
-    radial-gradient(90% 75% at 18% 92%, rgb(139 93 255 / 0.2), transparent 66%),
-    radial-gradient(80% 70% at 88% 78%, rgb(243 84 207 / 0.14), transparent 66%),
-    linear-gradient(180deg, #08192e 0%, #070b1a 46%, #05060d 100%);
-}
-
-/* A soft horizon under the corridor, so the panels sit in the space instead of
-   floating over a gradient. */
-.showcase__pin::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: auto 0 0;
-  height: 46%;
-  pointer-events: none;
-  background: linear-gradient(180deg, transparent, rgb(4 5 12 / 0.85));
-}
-
 /* ---------------------------------------------------------- identity scroll */
 
-/*
- * Sits above the cursor trail (z-60), unlike every other section.
- *
- * The trail is painted over the page with `screen` blending so that it reads
- * across the whole site rather than only where a background happens to be
- * transparent. That is right over the dark corridor and the glass panels, but
- * wrong here: this section is a full-bleed portrait and large display type,
- * and coloured tubes crawling across a face and over the name look like a
- * rendering fault rather than an effect. So the trail passes behind it.
- */
 .identity-scroll {
   position: relative;
-  z-index: 61;
+  z-index: 2;
   height: 285svh;
-  background: #030307;
 }
 
 .identity-stage {
@@ -121,7 +73,6 @@ body {
   min-height: 42rem;
   overflow: hidden;
   isolation: isolate;
-  background: #030307;
 }
 
 .identity-stage::before {
@@ -343,9 +294,8 @@ body {
     linear-gradient(rgb(255 255 255 / 0.018) 1px, transparent 1px),
     linear-gradient(90deg, rgb(255 255 255 / 0.018) 1px, transparent 1px),
     radial-gradient(circle at 82% 8%, rgb(116 75 255 / 0.11), transparent 24rem),
-    radial-gradient(circle at 8% 35%, rgb(33 182 255 / 0.08), transparent 27rem),
-    #05060a;
-  background-size: 72px 72px, 72px 72px, auto, auto, auto;
+    radial-gradient(circle at 8% 35%, rgb(33 182 255 / 0.08), transparent 27rem);
+  background-size: 72px 72px, 72px 72px, auto, auto;
 }
 
 .portfolio-shell::before {
@@ -855,10 +805,20 @@ body {
  * continuous effect across the whole page instead of something that only
  * shows through wherever a background happens to be transparent.
  */
+/*
+ * The cursor trail, painted behind every section rather than over them.
+ *
+ * Over the top it washed across artwork and type — the thing it is supposed to
+ * decorate. Underneath, it still reads across the whole site, because the
+ * sections carry no fill of their own: the page's black is painted once on the
+ * document, this sits above that, and the content sits above this. `screen`
+ * blending against black leaves the tubes at full strength and costs nothing
+ * where the canvas is empty.
+ */
 .tubes-cursor {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: 0;
   overflow: hidden;
   pointer-events: none;
   mix-blend-mode: screen;
