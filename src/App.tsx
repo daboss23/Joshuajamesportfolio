@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { initSmoothScroll } from "./lib/smooth-scroll";
-import { CrystalIntro } from "./components/CrystalIntro";
 import { CursorHint } from "./components/CursorHint";
 import { ScrollProgress } from "./components/ScrollProgress";
 import { ReelLightbox } from "./components/ReelLightbox";
@@ -40,13 +39,9 @@ export default function App() {
       </header>
 
       <main id="top" className="relative z-[1]">
-        <CrystalIntro />
-
         <ScrollShowcase reels={REELS} onSelect={open}>
           <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-24 text-center sm:py-28">
             <div className="px-6">
-              {/* The opening film carries no copy of its own, so this is the
-                  page's first and top-level heading. */}
               <h1 className="text-balance text-4xl font-medium tracking-tight text-white [text-shadow:0_2px_30px_rgba(0,0,0,0.95)] sm:text-6xl">
                 Short-form video,
                 <br />

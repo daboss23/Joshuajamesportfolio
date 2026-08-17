@@ -31,14 +31,6 @@ body {
 
 .showcase {
   position: relative;
-  /*
-   * Pulled up a full screen so the hero is already pinned and painted while the
-   * opening film is still on top of it. The film's last act is a push-in that
-   * blows out to white, and it dissolves to reveal this — with the overlap
-   * there is no frame in which neither section is on screen, which is the
-   * whole trick behind the two reading as one continuous shot.
-   */
-  margin-top: -200svh;
 
   /*
    * A backdrop that outlives the hero.
@@ -46,34 +38,20 @@ body {
    * The hero's own atmosphere lives on the pin and therefore fades out with
    * it, which left roughly a screen of flat black between the corridor
    * dimming and the identity portrait rising into view. This sits behind both
-   * and carries the crystal's blue down until the identity section's own
-   * background takes over, so the two never meet across a dead gap.
+   * and carries the blue down until the identity section's own background
+   * takes over, so the two never meet across a dead gap.
    */
   background:
     radial-gradient(70% 40% at 50% 46%, rgb(94 132 255 / 0.1), transparent 70%),
     linear-gradient(180deg, #0a1c33 0%, #081428 20%, #060a18 46%, #05060f 72%, #04050a 100%);
 }
 
-/* The anchor still means "the top of the hero", not the top of the overlap. */
-#work {
-  scroll-margin-top: 200svh;
-}
-
 /* The extra height past one screen is how far the hero recedes before the
-   parallax takes over. The first screen of that budget is spent underneath the
-   opening film — see the negative margin above — so this carries an extra
-   200svh purely to pay for the overlap; without it the hero would start
-   receding the instant the bloom cleared and never get a beat of its own.
-
-   The overlap is two screens rather than one so that the hero is already
-   pinned flush to the top of the viewport before the bloom starts. At one
-   screen it was still sliding up during the flash, leaving a strip of bare
-   page background above it — a hard black edge across the brightest frame of
-   the handoff. */
+   parallax takes over. */
 .showcase__hero {
   position: relative;
   z-index: 1;
-  height: 400svh;
+  height: 185svh;
 }
 
 .showcase__pin {
@@ -85,14 +63,12 @@ body {
 }
 
 /*
- * What the bloom resolves into.
+ * The space the corridor sits in.
  *
- * Left on the page's flat black, the handoff went white and then dropped into
- * an empty dark room — the reel corridor's panels are small and dim as they
- * are born at the vanishing point, so there was nothing to land on. This
- * carries the crystal's own blue out of the film and lets it decay into the
- * site's ink, which is what makes the cut feel like a continuation of the shot
- * rather than the end of one.
+ * On the page's flat black the reel panels had nothing to be born out of —
+ * they are small and dim at the vanishing point, so the top of the page read
+ * as an empty dark room. This gives the corridor some depth to travel
+ * through, and decays into the site's ink as the hero recedes.
  */
 .showcase__pin::before {
   content: "";
@@ -862,100 +838,6 @@ body {
   .portfolio-footer > p { order: 3; }
 }
 
-/* ============================================================ opening film */
-
-/*
- * Deliberately transparent. The section outlives its own stage: it stays
- * stacked above the hero for the whole overlap, so an opaque background here
- * would keep covering the hero long after the film itself had faded out —
- * which is exactly the black hole this used to hand over to. Only the stage,
- * which does fade, is allowed to paint.
- */
-.intro-scroll {
-  position: relative;
-  z-index: 3;
-  height: 400svh;
-}
-
-.intro-stage {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  overflow: hidden;
-  isolation: isolate;
-  background: #04070e;
-  /* The crystal the camera flies into sits here, so the push-in and the bloom
-     both have to grow out of this point rather than the geometric centre. */
-  transform-origin: 55% 44%;
-  will-change: transform, opacity, filter;
-}
-
-.intro-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  /* Graded a touch cooler and deeper so the ocean footage sits in the same
-     world as the near-black page it hands over to. */
-  filter: saturate(1.12) contrast(1.06) brightness(0.94);
-}
-
-.intro-vignette,
-.intro-flash {
-  position: absolute;
-  pointer-events: none;
-}
-
-/* Only a whisper of edge shading — enough to seat the film against the page's
-   own ink without putting a dark frame around footage meant to be seen clean. */
-.intro-vignette {
-  inset: 0;
-  background:
-    radial-gradient(130% 100% at 55% 44%, transparent 55%, rgb(4 7 14 / 0.3) 88%, rgb(4 7 14 / 0.55) 100%),
-    linear-gradient(180deg, rgb(4 7 14 / 0.3), transparent 20%, transparent 74%, rgb(4 7 14 / 0.42));
-}
-
-.intro-flash {
-  inset: -20%;
-  opacity: 0;
-  mix-blend-mode: screen;
-  background: radial-gradient(
-    circle at 55% 44%,
-    #ffffff 0%,
-    rgb(219 240 255 / 0.92) 20%,
-    rgb(150 205 255 / 0.38) 44%,
-    transparent 70%
-  );
-}
-
-.intro-cue {
-  position: absolute;
-  z-index: 2;
-  bottom: 2.2rem;
-  left: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.7rem;
-  translate: -50% 0;
-}
-
-.intro-cue span {
-  color: rgb(255 255 255 / 0.7);
-  font-size: 0.52rem;
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
-  text-shadow: 0 2px 16px rgb(2 8 20 / 0.9);
-}
-
-.intro-cue i {
-  width: 1px;
-  height: 2.8rem;
-  background: linear-gradient(var(--cyan), transparent);
-  animation: scrollCue 1.8s ease-in-out infinite;
-}
-
 /* ====================================================== site-wide chrome */
 
 /*
@@ -970,14 +852,6 @@ body {
   overflow: hidden;
   pointer-events: none;
   mix-blend-mode: screen;
-  /* Held back through the opening film — the trail belongs to the site, not to
-     the footage, and rainbow tubes crawling over the crystal read as a bug.
-     It arrives with the montage, on the same cue as the header. */
-  opacity: 0;
-  transition: opacity 900ms ease;
-}
-
-html[data-chrome="on"] .tubes-cursor {
   opacity: 0.92;
 }
 
@@ -1000,20 +874,8 @@ html[data-chrome="on"] .tubes-cursor {
   animation: spectrumDrift 9s linear infinite;
 }
 
-/* The header stays out of the title sequence and drops in with the hero.
-   Hidden by default rather than revealed by an "off" state, so it cannot flash
-   on screen in the frame before the intro's first measurement lands. */
 .site-header {
-  opacity: 0;
-  transform: translateY(-140%);
-  pointer-events: none;
   transition: opacity 700ms ease, transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-html[data-chrome="on"] .site-header {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
 }
 
 /* ============================================================ colour pass */
@@ -1247,7 +1109,6 @@ html[data-chrome="on"] .site-header {
 }
 
 @media (max-width: 640px) {
-  .intro-scroll { height: 320svh; }
 }
 
 /* Keyed to the input device rather than the viewport: the trail follows a
@@ -1267,36 +1128,17 @@ html[data-chrome="on"] .site-header {
    * `static`: their absolutely-positioned children would otherwise escape and
    * resolve against the showcase, spilling the columns over the hero.
    */
-  .identity-scroll,
-  .intro-scroll {
+  .identity-scroll {
     height: 100svh;
   }
 
   .identity-stage,
-  .intro-stage,
   .showcase__pin {
     position: relative;
   }
 
   .showcase__hero {
     height: 100svh;
-  }
-
-  /* Nothing is scrubbing the film or blowing it out, so the two sections have
-     to sit end to end instead of overlapping — otherwise the hero would be
-     hidden underneath a frozen first frame. */
-  .showcase {
-    margin-top: 0;
-  }
-
-  #work {
-    scroll-margin-top: 0;
-  }
-
-  .intro-stage {
-    transform: none;
-    filter: none;
-    opacity: 1;
   }
 
   *,
