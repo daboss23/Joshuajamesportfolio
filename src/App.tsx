@@ -26,7 +26,7 @@ export default function App() {
       <TubesCursor />
       <ScrollProgress />
 
-      <header className="site-header fixed inset-x-0 top-0 z-40 flex items-center justify-between px-6 py-5 sm:px-10">
+      <header className="site-header fixed inset-x-0 top-0 z-[80] flex items-center justify-between px-6 py-5 sm:px-10">
         <a href="#top" className="site-logo text-sm font-semibold tracking-tight text-white">
           Joshua James <span>Motion &amp; edit</span>
         </a>
@@ -38,7 +38,13 @@ export default function App() {
         </nav>
       </header>
 
-      <main id="top" className="relative z-[1]">
+      {/*
+        No `z-index` here on purpose. Giving `main` one makes it a stacking
+        context, which traps every section below the cursor trail's layer no
+        matter what z-index a section asks for — and the identity section needs
+        to sit above it. `relative` alone does not create one.
+      */}
+      <main id="top" className="relative">
         <ScrollShowcase reels={REELS} onSelect={open}>
           <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-24 text-center sm:py-28">
             <div className="px-6">

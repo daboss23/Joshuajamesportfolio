@@ -34,7 +34,9 @@ export function ReelLightbox({ reel, onClose, onStep }: Props) {
       role="dialog"
       aria-modal="true"
       aria-label={reel.title}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
+      // Above the cursor trail and every piece of fixed chrome: a player that
+      // has rainbow tubes crawling across it is not a player.
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
       onClick={onClose}
     >
       <div

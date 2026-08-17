@@ -96,9 +96,19 @@ body {
 
 /* ---------------------------------------------------------- identity scroll */
 
+/*
+ * Sits above the cursor trail (z-60), unlike every other section.
+ *
+ * The trail is painted over the page with `screen` blending so that it reads
+ * across the whole site rather than only where a background happens to be
+ * transparent. That is right over the dark corridor and the glass panels, but
+ * wrong here: this section is a full-bleed portrait and large display type,
+ * and coloured tubes crawling across a face and over the name look like a
+ * rendering fault rather than an effect. So the trail passes behind it.
+ */
 .identity-scroll {
   position: relative;
-  z-index: 2;
+  z-index: 61;
   height: 285svh;
   background: #030307;
 }
@@ -858,7 +868,8 @@ body {
 .scroll-rail {
   position: fixed;
   inset: 0 0 auto;
-  z-index: 70;
+  /* Top of the stack: two pixels of page position that nothing should cover. */
+  z-index: 90;
   height: 2px;
   pointer-events: none;
   background: rgb(255 255 255 / 0.06);
