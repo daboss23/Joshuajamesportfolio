@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react";
-import { ImageStreamHero } from "./components/ImageStreamHero";
 import { ReelGrid } from "./components/ReelGrid";
 import { ReelLightbox } from "./components/ReelLightbox";
 import { TubesCursor } from "./components/TubesCursor";
@@ -32,24 +31,16 @@ export default function App() {
       </header>
 
       <main id="top" className="relative z-[1]">
-        <ImageStreamHero
-          reels={REELS}
-          onSelect={open}
-          className="h-[100svh] w-full"
-        >
-          <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-24 text-center sm:py-28">
-            <div className="px-6">
-              <h1 className="text-balance text-4xl font-medium tracking-tight text-white sm:text-6xl">
-                Short-form video,
-                <br />
-                front and centre.
-              </h1>
-            </div>
-            <p className="max-w-md text-balance px-6 text-sm text-white/60">
-              Tap any frame to play it — or scroll down for the full shelf.
-            </p>
-          </div>
-        </ImageStreamHero>
+        <section className="flex min-h-[80svh] flex-col items-center justify-center gap-6 px-6 text-center">
+          <h1 className="text-balance text-4xl font-medium tracking-tight text-white sm:text-6xl">
+            Short-form video,
+            <br />
+            front and centre.
+          </h1>
+          <p className="max-w-md text-balance text-sm text-white/60">
+            Scroll down for the full shelf — tap any reel to play it.
+          </p>
+        </section>
 
         <section id="work" className="mx-auto max-w-6xl px-6 py-24 sm:px-10">
           <div className="mb-10 flex items-end justify-between gap-6">
