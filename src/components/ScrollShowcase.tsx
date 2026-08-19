@@ -29,21 +29,18 @@ export function ScrollShowcase({ reels, onSelect, children }: Props) {
 
     return trackScrollProgress(hero, (p) => {
       /*
-       * The corridor shrinks toward the vanishing point and dims, so the
-       * handoff reads as depth rather than a plain fade-out.
-       *
-       * The fade is spread across the whole of the travel rather than rushed:
-       * finishing early left the hero invisible for the best part of a screen
-       * before the identity section had risen far enough to show anything,
-       * which read as the page briefly going dead. Reaching zero exactly at
-       * the end means the next section is entering the viewport at the moment
-       * this one runs out.
+       * Keep the corridor alive behind the incoming identity artwork. The pin
+       * physically leaves the viewport during the final screen of its parent;
+       * fading it to black before then exposed an empty layer and made the two
+       * scenes feel like separate pages. A restrained recession leaves enough
+       * image underneath for the portrait to replace it as one continuous
+       * handoff.
        */
-      pin.style.opacity = String(1 - p);
-      pin.style.transform = `translate3d(0, ${-p * 12}vh, 0) scale(${1 - p * 0.18})`;
-      pin.style.filter = `blur(${p * 6}px)`;
-      // Once it has faded out it is still pinned over the viewport, so stop it
-      // intercepting clicks meant for whatever is underneath.
+      pin.style.opacity = String(1 - p * 0.66);
+      pin.style.transform = `translate3d(0, ${-p * 4}vh, 0) scale(${1 - p * 0.06})`;
+      pin.style.filter = `blur(${p * 1.5}px)`;
+      // Once it has mostly receded it is still pinned over the viewport, so
+      // stop it intercepting clicks meant for whatever is underneath.
       pin.style.pointerEvents = p > 0.85 ? "none" : "auto";
     });
   }, []);

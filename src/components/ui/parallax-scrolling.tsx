@@ -34,19 +34,20 @@ export function ParallaxComponent() {
       const cue = cueRef.current;
       if (!stage || !portrait || !copy || !details || !cue) return;
 
-      const enter = smoothstep(0.03, 0.2, progress);
-      const exit = 1 - smoothstep(0.84, 0.99, progress);
+      const enter = smoothstep(0, 0.1, progress);
+      const exit = 1 - smoothstep(0.8, 0.98, progress);
       const visible = Math.min(enter, exit);
-      const meeting = smoothstep(0.06, 0.82, progress);
+      /* The name and portrait meet quickly, then the composition settles. */
+      const meeting = smoothstep(0.015, 0.36, progress);
 
       portrait.style.cssText = [
-        `opacity:${0.22 + visible * 0.78}`,
-        `transform:translate3d(${2 - meeting * 9}vw, ${(progress - 0.5) * -2.5}vh, 0) scale(${1.01 + meeting * 0.035})`,
+        "opacity:1",
+        `transform:translate3d(${1 - meeting * 7}vw, ${(progress - 0.5) * -1.4}vh, 0) scale(${1.01 + meeting * 0.025})`,
       ].join(";");
 
       copy.style.cssText = [
         `opacity:${visible}`,
-        `transform:translate3d(${-3 + meeting * 8.5}vw, ${(progress - 0.5) * -8}vh, 0)`,
+        `transform:translate3d(${-1 + meeting * 6}vw, ${(progress - 0.5) * -4}vh, 0)`,
       ].join(";");
 
       details.style.cssText = [
@@ -54,8 +55,8 @@ export function ParallaxComponent() {
         `transform:translate3d(${(1 - meeting) * 2.5}vw, ${(progress - 0.5) * -5}vh, 0)`,
       ].join(";");
 
-      cue.style.opacity = String(1 - smoothstep(0.08, 0.24, progress));
-      stage.style.setProperty("--identity-glow", String(0.32 + progress * 0.68));
+      cue.style.opacity = String(1 - smoothstep(0.03, 0.14, progress));
+      stage.style.setProperty("--identity-glow", String(0.58 + progress * 0.42));
     }, { reducedValue: 0.72 });
   }, []);
 
