@@ -59,7 +59,7 @@ export function ParallaxComponent() {
        * turn. Keeping the name reveal even later makes the look land on it.
        */
       const walkProgress = clamp(progress / 0.875);
-      const walkScale = 0.72 + walkProgress * 0.53;
+      const walkScale = 0.65 + walkProgress * 1.2;
       const walkBob = Math.sin(walkProgress * Math.PI * 8) * (1 - walkProgress) * 0.35;
       const walkOpacity = 1 - smoothstep(0.872, 0.897, progress);
       const liftOpacity =
