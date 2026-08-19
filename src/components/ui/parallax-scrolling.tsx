@@ -41,12 +41,12 @@ export function ParallaxComponent() {
 
       portrait.style.cssText = [
         `opacity:${0.22 + visible * 0.78}`,
-        `transform:translate3d(${8.5 - meeting * 10.5}vw, ${(progress - 0.5) * -2.5}vh, 0) scale(${1.02 + meeting * 0.045})`,
+        `transform:translate3d(${6 - meeting * 10}vw, ${(progress - 0.5) * -2.5}vh, 0) scaleX(-1) scale(${1.01 + meeting * 0.035})`,
       ].join(";");
 
       copy.style.cssText = [
         `opacity:${visible}`,
-        `transform:translate3d(${-7 + meeting * 9}vw, ${(progress - 0.5) * -8}vh, 0)`,
+        `transform:translate3d(${-5 + meeting * 8.5}vw, ${(progress - 0.5) * -8}vh, 0)`,
       ].join(";");
 
       details.style.cssText = [
@@ -65,8 +65,8 @@ export function ParallaxComponent() {
         <img
           ref={portraitRef}
           className="identity-portrait"
-          src="/images/joshua-name-smirk.webp"
-          alt="Joshua James in a deep-purple suit, smiling toward his name"
+          src="/images/joshua-identity-hero.png"
+          alt="Joshua James looking toward his name inside a violet light ring"
           fetchPriority="high"
           decoding="async"
         />

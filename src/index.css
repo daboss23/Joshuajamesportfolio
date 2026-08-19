@@ -96,13 +96,13 @@ body {
   bottom: -4%;
   width: min(55vw, 48rem);
   height: 108%;
-  object-fit: contain;
-  object-position: right bottom;
+  object-fit: cover;
+  object-position: right center;
   opacity: 0.22;
   will-change: transform, opacity;
   filter: saturate(0.94) contrast(1.045);
   mask-image: linear-gradient(90deg, transparent 0%, black 17%, black 100%);
-  transform: translate3d(8.5vw, 0, 0) scale(1.02);
+  transform: translate3d(6vw, 0, 0) scaleX(-1) scale(1.01);
   transform-origin: 72% 58%;
 }
 
@@ -118,14 +118,14 @@ body {
 .identity-orbit {
   position: absolute;
   z-index: 0;
-  top: 15%;
-  right: 4.5%;
-  width: min(39vw, 39rem);
+  top: 7%;
+  right: 0.5%;
+  width: min(52vw, 50rem);
   aspect-ratio: 1;
-  border: 1px solid rgb(230 167 255 / 0.12);
+  border: 1.5px solid rgb(230 125 255 / 0.38);
   border-radius: 50%;
-  box-shadow: 0 0 90px rgb(157 67 255 / calc(var(--identity-glow) * 0.1));
-  opacity: calc(var(--identity-glow) * 0.65);
+  box-shadow: 0 0 34px rgb(204 66 255 / 0.2), 0 0 100px rgb(157 67 255 / calc(var(--identity-glow) * 0.22));
+  opacity: calc(0.52 + var(--identity-glow) * 0.34);
   animation: identityOrbit 15s linear infinite;
 }
 
