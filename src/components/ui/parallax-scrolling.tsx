@@ -41,7 +41,7 @@ export function ParallaxComponent() {
 
       portrait.style.cssText = [
         `opacity:${0.22 + visible * 0.78}`,
-        `transform:translate3d(${6 - meeting * 10}vw, ${(progress - 0.5) * -2.5}vh, 0) scaleX(-1) scale(${1.01 + meeting * 0.035})`,
+        `transform:translate3d(${4 - meeting * 8}vw, ${(progress - 0.5) * -2.5}vh, 0) scale(${1.01 + meeting * 0.035})`,
       ].join(";");
 
       copy.style.cssText = [
