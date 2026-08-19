@@ -59,8 +59,8 @@ export function ParallaxComponent() {
        * turn. Keeping the name reveal even later makes the look land on it.
        */
       const walkProgress = clamp(progress / 0.875);
-      const walkScale = 0.72 + walkProgress * 0.62;
-      const walkBob = Math.sin(walkProgress * Math.PI * 8) * (1 - walkProgress) * 0.55;
+      const walkScale = 0.72 + walkProgress * 0.53;
+      const walkBob = Math.sin(walkProgress * Math.PI * 8) * (1 - walkProgress) * 0.35;
       const walkOpacity = 1 - smoothstep(0.872, 0.897, progress);
       const liftOpacity =
         smoothstep(0.872, 0.897, progress) *
@@ -73,7 +73,7 @@ export function ParallaxComponent() {
 
       walk.style.cssText = [
         `opacity:${walkOpacity}`,
-        `transform:translate3d(${(1 - walkProgress) * 5}vw, ${8 - walkProgress * 10 + walkBob}vh, 0) scale(${walkScale})`,
+        `transform:translate3d(${(1 - walkProgress) * 5}vw, ${7 - walkProgress * 7 + walkBob}vh, 0) scale(${walkScale})`,
       ].join(";");
 
       lift.style.cssText = [
