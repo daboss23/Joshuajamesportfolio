@@ -73,7 +73,7 @@ export function ParallaxComponent() {
 
       walk.style.cssText = [
         `opacity:${walkOpacity}`,
-        `transform:translate3d(${(1 - walkProgress) * 5}vw, ${7 - walkProgress * 7 + walkBob}vh, 0) scale(${walkScale})`,
+        `transform:translate3d(${(1 - walkProgress) * 5}vw, ${7 + walkProgress * 3.5 + walkBob}vh, 0) scale(${walkScale})`,
       ].join(";");
 
       lift.style.cssText = [
