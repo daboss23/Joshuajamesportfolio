@@ -100,7 +100,7 @@ body {
   opacity: 0.22;
   will-change: transform, opacity;
   filter: saturate(0.94) contrast(1.045);
-  transform: translate3d(4vw, 0, 0) scale(1.01);
+  transform: translate3d(2vw, 0, 0) scale(1.01);
   transform-origin: 72% 58%;
 }
 
@@ -112,6 +112,56 @@ body {
     linear-gradient(90deg, rgb(2 2 6 / 0.98) 0%, rgb(2 2 6 / 0.82) 34%, rgb(2 2 6 / 0.12) 66%, rgb(2 2 6 / 0.16) 100%),
     linear-gradient(180deg, rgb(3 3 8 / 0.48), transparent 22%, transparent 70%, rgb(3 3 8 / 0.92));
 }
+
+.identity-energy {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: calc(0.3 + var(--identity-glow) * 0.3);
+}
+
+.identity-energy::before {
+  content: "";
+  position: absolute;
+  inset: 8% 1% 5% 36%;
+  background:
+    radial-gradient(circle at 28% 65%, rgb(246 166 85 / 0.4) 0 1px, transparent 2px),
+    radial-gradient(circle at 50% 24%, rgb(224 111 255 / 0.4) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 72% 45%, rgb(255 201 128 / 0.34) 0 1px, transparent 2px),
+    radial-gradient(circle at 86% 73%, rgb(194 77 255 / 0.38) 0 1.5px, transparent 2.5px);
+  background-size: 9rem 8rem, 12rem 10rem, 10rem 12rem, 13rem 9rem;
+  filter: drop-shadow(0 0 7px rgb(202 86 255 / 0.48));
+  animation: identityEnergyField 18s ease-in-out infinite alternate;
+}
+
+.identity-energy span {
+  --drift-x: 1rem;
+  --drift-y: -1.5rem;
+  --rotation: 18deg;
+  --duration: 10s;
+  position: absolute;
+  width: 0.55rem;
+  aspect-ratio: 0.76;
+  opacity: 0.3;
+  background: linear-gradient(135deg, rgb(255 213 142 / 0.75), rgb(189 64 255 / 0.12) 52%, rgb(118 52 255 / 0.55));
+  clip-path: polygon(50% 0, 100% 74%, 55% 100%, 0 66%);
+  filter: drop-shadow(0 0 7px rgb(207 75 255 / 0.55));
+  transform: rotate(var(--rotation));
+  animation: identityEnergyFloat var(--duration) ease-in-out infinite alternate;
+}
+
+.identity-energy span:nth-child(1) { left: 42%; top: 29%; --duration: 12s; --drift-x: 1.2rem; --drift-y: -1rem; }
+.identity-energy span:nth-child(2) { left: 49%; top: 66%; width: 0.8rem; --rotation: -14deg; --duration: 14s; --drift-x: -1rem; --drift-y: -1.8rem; }
+.identity-energy span:nth-child(3) { left: 57%; top: 18%; width: 0.4rem; --rotation: 42deg; --duration: 9s; --drift-x: 0.7rem; --drift-y: 1.4rem; }
+.identity-energy span:nth-child(4) { left: 64%; top: 76%; width: 0.65rem; --rotation: 8deg; --duration: 13s; --drift-x: 1.3rem; --drift-y: -1.2rem; }
+.identity-energy span:nth-child(5) { left: 72%; top: 13%; width: 0.75rem; --rotation: -28deg; --duration: 11s; --drift-x: -0.9rem; --drift-y: 1.1rem; }
+.identity-energy span:nth-child(6) { left: 79%; top: 69%; width: 0.45rem; --rotation: 31deg; --duration: 15s; --drift-x: 1rem; --drift-y: -1.6rem; }
+.identity-energy span:nth-child(7) { left: 86%; top: 23%; width: 0.55rem; --rotation: -9deg; --duration: 10s; --drift-x: -1.1rem; --drift-y: 1.2rem; }
+.identity-energy span:nth-child(8) { left: 91%; top: 57%; width: 0.8rem; --rotation: 24deg; --duration: 13.5s; --drift-x: 0.8rem; --drift-y: -1.4rem; }
+.identity-energy span:nth-child(9) { left: 53%; top: 47%; width: 0.3rem; border-radius: 50%; clip-path: none; --duration: 8s; --drift-x: -0.6rem; --drift-y: -1rem; }
+.identity-energy span:nth-child(10) { left: 83%; top: 42%; width: 0.35rem; border-radius: 50%; clip-path: none; --duration: 9.5s; --drift-x: 0.7rem; --drift-y: 1.1rem; }
 
 .identity-orbit {
   position: absolute;
@@ -732,6 +782,14 @@ body {
 @keyframes toolMarquee { to { transform: translateX(-50%); } }
 
 @keyframes identityOrbit { to { transform: rotate(360deg); } }
+@keyframes identityEnergyField {
+  from { transform: translate3d(-0.5%, 0.8%, 0) scale(0.98); opacity: 0.58; }
+  to { transform: translate3d(1.2%, -1%, 0) scale(1.03); opacity: 0.92; }
+}
+@keyframes identityEnergyFloat {
+  from { transform: translate3d(0, 0, 0) rotate(var(--rotation)); opacity: 0.16; }
+  to { transform: translate3d(var(--drift-x), var(--drift-y), 0) rotate(calc(var(--rotation) + 16deg)); opacity: 0.46; }
+}
 @keyframes availabilityPulse { 50% { opacity: 0.38; transform: scale(0.72); } }
 @keyframes scrollCue { 0%, 100% { transform: scaleY(0.45); transform-origin: top; opacity: 0.35; } 50% { transform: scaleY(1); transform-origin: top; opacity: 1; } }
 

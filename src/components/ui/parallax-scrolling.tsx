@@ -41,12 +41,12 @@ export function ParallaxComponent() {
 
       portrait.style.cssText = [
         `opacity:${0.22 + visible * 0.78}`,
-        `transform:translate3d(${4 - meeting * 8}vw, ${(progress - 0.5) * -2.5}vh, 0) scale(${1.01 + meeting * 0.035})`,
+        `transform:translate3d(${2 - meeting * 9}vw, ${(progress - 0.5) * -2.5}vh, 0) scale(${1.01 + meeting * 0.035})`,
       ].join(";");
 
       copy.style.cssText = [
         `opacity:${visible}`,
-        `transform:translate3d(${-5 + meeting * 8.5}vw, ${(progress - 0.5) * -8}vh, 0)`,
+        `transform:translate3d(${-3 + meeting * 8.5}vw, ${(progress - 0.5) * -8}vh, 0)`,
       ].join(";");
 
       details.style.cssText = [
@@ -65,12 +65,15 @@ export function ParallaxComponent() {
         <img
           ref={portraitRef}
           className="identity-portrait"
-          src="/images/joshua-cinematic-clean.webp"
-          alt="Joshua James looking toward his name in a cinematic violet light scene"
+          src="/images/joshua-bomber-clean.webp"
+          alt="Joshua James in a shearling bomber jacket looking toward his name"
           fetchPriority="high"
           decoding="async"
         />
         <div className="identity-scrim" aria-hidden="true" />
+        <div className="identity-energy" aria-hidden="true">
+          {Array.from({ length: 10 }, (_, index) => <span key={index} />)}
+        </div>
 
         <div ref={copyRef} className="identity-copy">
           <p className="identity-kicker"><span />Motion that moves. Stories that stay.<span /></p>
