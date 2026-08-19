@@ -62,7 +62,7 @@ body {
 .identity-scroll {
   position: relative;
   z-index: 2;
-  height: 360svh;
+  height: 285svh;
 }
 
 .identity-stage {
@@ -89,38 +89,21 @@ body {
   mask-image: linear-gradient(90deg, black, transparent 62%);
 }
 
-.identity-backdrop {
-  position: absolute;
-  z-index: -4;
-  inset: -6%;
-  background:
-    linear-gradient(90deg, rgb(3 2 8 / 0.68), rgb(3 2 8 / 0.08)),
-    url("/images/joshua-walk-no-shades.webp") center 24% / cover no-repeat;
-  opacity: 0.42;
-  filter: blur(22px) saturate(0.76) contrast(1.06);
-  transform: scale(1.04);
-  will-change: transform, opacity;
-}
-
-.identity-frame {
+.identity-portrait {
   position: absolute;
   z-index: -2;
-  right: clamp(-2rem, 1vw, 1rem);
-  bottom: -3%;
-  width: min(60vw, 51rem);
-  height: 106%;
+  right: clamp(-2rem, 1.8vw, 1.5rem);
+  bottom: -4%;
+  width: min(55vw, 48rem);
+  height: 108%;
   object-fit: contain;
   object-position: right bottom;
-  opacity: 0;
+  opacity: 0.22;
   will-change: transform, opacity;
   filter: saturate(0.94) contrast(1.045);
-  transform-origin: 68% 72%;
-}
-
-.identity-frame--walk {
-  opacity: 1;
-  transform: translate3d(5vw, 7vh, 0) scale(0.65);
-  transform-origin: 66% 18%;
+  mask-image: linear-gradient(90deg, transparent 0%, black 17%, black 100%);
+  transform: translate3d(8.5vw, 0, 0) scale(1.02);
+  transform-origin: 72% 58%;
 }
 
 .identity-scrim {
@@ -128,7 +111,7 @@ body {
   z-index: -1;
   inset: 0;
   background:
-    linear-gradient(90deg, rgb(2 2 6 / 0.98) 0%, rgb(2 2 6 / 0.86) 34%, rgb(2 2 6 / 0.16) 66%, rgb(2 2 6 / 0.12) 100%),
+    linear-gradient(90deg, rgb(2 2 6 / 0.98) 0%, rgb(2 2 6 / 0.82) 34%, rgb(2 2 6 / 0.12) 66%, rgb(2 2 6 / 0.16) 100%),
     linear-gradient(180deg, rgb(3 3 8 / 0.48), transparent 22%, transparent 70%, rgb(3 3 8 / 0.92));
 }
 
@@ -757,7 +740,7 @@ body {
 @media (max-width: 960px) {
   .identity-copy { width: min(37rem, 58vw); }
   .identity-copy h2 { font-size: clamp(5rem, 13vw, 8rem); }
-  .identity-frame { right: -8vw; width: 70vw; }
+  .identity-portrait { right: -10vw; width: 68vw; }
   .about-block { grid-template-columns: 1.2fr 0.8fr; }
   .stats-stack { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); border-left: 0; border-top: 1px solid rgb(255 255 255 / 0.1); }
   .stats-stack > div { padding-left: 1rem; border-bottom: 0; border-right: 1px solid rgb(255 255 255 / 0.08); }
@@ -778,11 +761,10 @@ body {
   .site-header::before { inset: 6px 8px; }
   .site-logo > span, .header-nav > a:not(.header-cta) { display: none; }
   .header-cta { margin-right: 0; }
-  .identity-scroll { height: 320svh; }
+  .identity-scroll { height: 235svh; }
   .identity-stage { min-height: 44rem; }
   .identity-stage::before { background-size: 18vw 18vw; opacity: 0.18; }
-  .identity-frame { right: -36%; bottom: 8%; width: 132%; height: 96%; object-position: center bottom; }
-  .identity-backdrop { inset: -10%; background-position: 56% center; filter: blur(18px) saturate(0.7); }
+  .identity-portrait { right: -34%; bottom: 13%; width: 134%; height: 84%; object-position: center bottom; mask-image: linear-gradient(180deg, black 0%, black 72%, transparent 100%); }
   .identity-scrim { background: linear-gradient(180deg, rgb(2 2 6 / 0.36) 0%, rgb(2 2 6 / 0.2) 35%, rgb(2 2 6 / 0.9) 63%, #020206 100%); }
   .identity-orbit { top: 12%; right: -18%; width: 88vw; }
   .identity-copy { top: auto; left: 1.2rem; right: 1.2rem; bottom: 5.1rem; width: auto; translate: 0; }

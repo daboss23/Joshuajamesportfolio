@@ -17,11 +17,7 @@ const smoothstep = (edge0: number, edge1: number, value: number) => {
 export function ParallaxComponent() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const backdropRef = useRef<HTMLDivElement>(null);
-  const walkRef = useRef<HTMLImageElement>(null);
-  const liftRef = useRef<HTMLImageElement>(null);
-  const shadesOnRef = useRef<HTMLImageElement>(null);
-  const nameLookRef = useRef<HTMLImageElement>(null);
+  const portraitRef = useRef<HTMLImageElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   const detailsRef = useRef<HTMLDivElement>(null);
   const cueRef = useRef<HTMLDivElement>(null);
@@ -32,119 +28,46 @@ export function ParallaxComponent() {
 
     return trackScrollProgress(section, (progress) => {
       const stage = stageRef.current;
-      const backdrop = backdropRef.current;
-      const walk = walkRef.current;
-      const lift = liftRef.current;
-      const shadesOn = shadesOnRef.current;
-      const nameLook = nameLookRef.current;
+      const portrait = portraitRef.current;
       const copy = copyRef.current;
       const details = detailsRef.current;
       const cue = cueRef.current;
-      if (
-        !stage ||
-        !backdrop ||
-        !walk ||
-        !lift ||
-        !shadesOn ||
-        !nameLook ||
-        !copy ||
-        !details ||
-        !cue
-      ) return;
+      if (!stage || !portrait || !copy || !details || !cue) return;
 
-      /*
-       * The shades are deliberately held back until the last 13% of the
-       * section. First the full-body frame advances toward camera; then three
-       * tightly-spaced stills create the action: lift, glasses seated, head
-       * turn. Keeping the name reveal even later makes the look land on it.
-       */
-      const walkProgress = clamp(progress / 0.875);
-      const walkScale = 0.65 + walkProgress * 1.2;
-      const walkBob = Math.sin(walkProgress * Math.PI * 8) * (1 - walkProgress) * 0.35;
-      const walkOpacity = 1 - smoothstep(0.872, 0.897, progress);
-      const liftOpacity =
-        smoothstep(0.872, 0.897, progress) *
-        (1 - smoothstep(0.918, 0.94, progress));
-      const shadesOnOpacity =
-        smoothstep(0.918, 0.94, progress) *
-        (1 - smoothstep(0.958, 0.98, progress));
-      const nameLookOpacity = smoothstep(0.958, 0.985, progress);
-      const nameReveal = smoothstep(0.973, 0.997, progress);
+      const enter = smoothstep(0.03, 0.2, progress);
+      const exit = 1 - smoothstep(0.84, 0.99, progress);
+      const visible = Math.min(enter, exit);
+      const meeting = smoothstep(0.06, 0.82, progress);
 
-      walk.style.cssText = [
-        `opacity:${walkOpacity}`,
-        `transform:translate3d(${(1 - walkProgress) * 5}vw, ${7 + walkProgress * 3.5 + walkBob}vh, 0) scale(${walkScale})`,
-      ].join(";");
-
-      lift.style.cssText = [
-        `opacity:${liftOpacity}`,
-        `transform:translate3d(1.6vw, ${1.5 - liftOpacity * 1.5}vh, 0) scale(${1.02 + liftOpacity * 0.025})`,
-      ].join(";");
-
-      shadesOn.style.cssText = [
-        `opacity:${shadesOnOpacity}`,
-        `transform:translate3d(1.2vw, 0, 0) scale(${1.04 + shadesOnOpacity * 0.02})`,
-      ].join(";");
-
-      nameLook.style.cssText = [
-        `opacity:${nameLookOpacity}`,
-        `transform:translate3d(${1.5 - nameLookOpacity * 1.5}vw, 0, 0) scale(${1.06 - nameLookOpacity * 0.02})`,
-      ].join(";");
-
-      backdrop.style.cssText = [
-        `opacity:${0.42 + progress * 0.16}`,
-        `transform:scale(${1.04 + progress * 0.055})`,
+      portrait.style.cssText = [
+        `opacity:${0.22 + visible * 0.78}`,
+        `transform:translate3d(${8.5 - meeting * 10.5}vw, ${(progress - 0.5) * -2.5}vh, 0) scale(${1.02 + meeting * 0.045})`,
       ].join(";");
 
       copy.style.cssText = [
-        `opacity:${nameReveal}`,
-        `transform:translate3d(${(1 - nameReveal) * -5}vw, 0, 0)`,
+        `opacity:${visible}`,
+        `transform:translate3d(${-7 + meeting * 9}vw, ${(progress - 0.5) * -8}vh, 0)`,
       ].join(";");
 
       details.style.cssText = [
-        `opacity:${nameReveal}`,
-        `transform:translate3d(0, ${(1 - nameReveal) * 2.5}vh, 0)`,
+        `opacity:${visible}`,
+        `transform:translate3d(${(1 - meeting) * 2.5}vw, ${(progress - 0.5) * -5}vh, 0)`,
       ].join(";");
 
       cue.style.opacity = String(1 - smoothstep(0.08, 0.24, progress));
       stage.style.setProperty("--identity-glow", String(0.32 + progress * 0.68));
-    }, { reducedValue: 1 });
+    }, { reducedValue: 0.72 });
   }, []);
 
   return (
     <section ref={sectionRef} className="identity-scroll" aria-labelledby="identity-title">
       <div ref={stageRef} className="identity-stage">
-        <div ref={backdropRef} className="identity-backdrop" aria-hidden="true" />
         <img
-          ref={walkRef}
-          className="identity-frame identity-frame--walk"
-          src="/images/joshua-walk-no-shades.webp"
-          alt="Joshua James walking toward the camera in a deep-purple suit"
+          ref={portraitRef}
+          className="identity-portrait"
+          src="/images/joshua-name-smirk.webp"
+          alt="Joshua James in a deep-purple suit, smiling toward his name"
           fetchPriority="high"
-          decoding="async"
-        />
-        <img
-          ref={liftRef}
-          className="identity-frame"
-          src="/images/joshua-shades-lift.webp"
-          alt=""
-          aria-hidden="true"
-          decoding="async"
-        />
-        <img
-          ref={shadesOnRef}
-          className="identity-frame"
-          src="/images/joshua-shades-on.webp"
-          alt=""
-          aria-hidden="true"
-          decoding="async"
-        />
-        <img
-          ref={nameLookRef}
-          className="identity-frame"
-          src="/images/joshua-name-look.webp"
-          alt=""
-          aria-hidden="true"
           decoding="async"
         />
         <div className="identity-scrim" aria-hidden="true" />
