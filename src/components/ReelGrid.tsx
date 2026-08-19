@@ -1,4 +1,5 @@
 import type { Reel } from "../data/reels";
+import { ReelPoster } from "./ReelPoster";
 
 export function ReelGrid({
   reels,
@@ -17,10 +18,8 @@ export function ReelGrid({
           aria-label={`Play ${reel.title}`}
           className="group relative aspect-[9/16] overflow-hidden rounded-xl bg-ink-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
-          <img
-            src={reel.poster}
-            alt={reel.alt}
-            loading="lazy"
+          <ReelPoster
+            reel={reel}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
           <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />

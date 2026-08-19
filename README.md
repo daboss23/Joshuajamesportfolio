@@ -23,22 +23,30 @@ Everything — hero corridor, work grid and player — is driven by one array in
 
 ```ts
 {
-  id: "my-reel",                 // unique
+  id: "my-reel",                  // unique; also the deep link, #/reel/my-reel
   title: "My Reel",
-  poster: "/posters/my-reel.jpg",// vertical 9:16 cover frame
+  poster: "/posters/my-reel.jpg", // vertical 9:16 cover frame
+  posterFallback: FALLBACK.moon3, // used only if the cover fails to load
   alt: "Description of the cover",
-  tiktokUrl: "https://www.tiktok.com/@handle/video/7300000000000000000",
-  // videoSrc: "/videos/my-reel.mp4",  // optional self-hosted file
+  videoSrc: "/videos/my-reel.mp4",// self-hosted file
+  driveId: "1AbC…",               // or stream from Drive
   client: "Brand",
   tags: ["Edit", "Colour"],
 }
 ```
 
-- `tiktokUrl` is played through TikTok's official embed (`/embed/v2/<id>`) and
-  also powers the "Open on TikTok" link.
-- `videoSrc` takes priority when set, so you can serve an mp4 for a faster,
-  chrome-free player and still link out to TikTok.
-- Drop posters in `public/` and reference them as `/posters/....jpg`.
+The player picks the first of these it finds:
+
+1. `videoSrc` — a self-hosted mp4/webm, played in a plain frame with no
+   third-party chrome. Best experience; needs the file to exist.
+2. `driveId` — streamed from Drive's own player. Nothing to host, but it
+   carries Google's chrome, will not autoplay, and Drive throttles files that
+   get a lot of views. The file has to be shared publicly.
+3. Neither — the lightbox says so rather than playing something unrelated.
+
+Covers work the same way: `poster` first, `posterFallback` if it fails to load.
+Self-hosted posters go in `public/posters/` and are referenced as
+`/posters/….jpg`.
 
 ## Importing the videos
 
