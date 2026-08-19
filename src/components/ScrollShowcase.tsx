@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { ImageStreamHero } from "./ImageStreamHero";
 import { ParallaxComponent } from "./ui/parallax-scrolling";
 import { trackScrollProgress } from "../lib/scroll-progress";
+import { cue, mix, smootherstep } from "../lib/easing";
 import type { Reel } from "../data/reels";
 
 type Props = {
@@ -29,19 +30,30 @@ export function ScrollShowcase({ reels, onSelect, children }: Props) {
 
     return trackScrollProgress(hero, (p) => {
       /*
-       * Keep the corridor alive behind the incoming identity artwork. The pin
-       * physically leaves the viewport during the final screen of its parent;
-       * fading it to black before then exposed an empty layer and made the two
-       * scenes feel like separate pages. A restrained recession leaves enough
-       * image underneath for the portrait to replace it as one continuous
-       * handoff.
+       * The corridor holds at full strength for the first third of its budget
+       * and only then begins to leave. Receding from the very first pixel of
+       * scroll is what made the old handoff feel abrupt: the section the user
+       * was still looking at started dimming before anything had arrived to
+       * replace it, so the movement read as a fault rather than as a
+       * transition. Holding first, then dissolving across the same window the
+       * portrait fades up in, turns the two scenes into one cross-dissolve.
        */
-      pin.style.opacity = String(1 - p * 0.66);
-      pin.style.transform = `translate3d(0, ${-p * 4}vh, 0) scale(${1 - p * 0.06})`;
-      pin.style.filter = `blur(${p * 1.5}px)`;
-      // Once it has mostly receded it is still pinned over the viewport, so
-      // stop it intercepting clicks meant for whatever is underneath.
-      pin.style.pointerEvents = p > 0.85 ? "none" : "auto";
+      const leaving = cue([0.32, 0.94], p);
+      /* Drift is on its own, slower curve so the corridor keeps travelling
+         after it has faded — motion that continues past the dissolve is what
+         sells the recession as depth rather than as an opacity change. */
+      const recede = smootherstep(0, 1, p);
+
+      pin.style.opacity = String(1 - leaving);
+      pin.style.transform = `translate3d(0, ${mix(0, -7, recede).toFixed(2)}vh, 0) scale(${mix(
+        1,
+        0.9,
+        recede,
+      ).toFixed(4)})`;
+      pin.style.filter = `blur(${mix(0, 5, leaving).toFixed(2)}px)`;
+      // Once it has mostly dissolved it is still pinned over the viewport, so
+      // stop it intercepting clicks meant for the scene underneath.
+      pin.style.pointerEvents = leaving > 0.4 ? "none" : "auto";
     });
   }, []);
 
