@@ -134,10 +134,14 @@ export function ImageStreamHero({
                 loading={i < 4 ? "eager" : "lazy"}
                 className="h-full w-full rounded-xl object-cover shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
               />
-              <span className="absolute inset-0 grid place-items-center rounded-xl bg-black/35 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-black">
-                  <PlayIcon />
-                </span>
+              <span className="pointer-events-none absolute inset-0 grid place-items-center rounded-xl bg-black/10 transition-colors duration-300 group-hover:bg-black/20">
+                <img
+                  src="/images/neon-play-button.png"
+                  alt=""
+                  aria-hidden="true"
+                  draggable={false}
+                  className="h-24 w-24 object-contain drop-shadow-[0_0_24px_rgba(118,56,255,0.5)] transition-transform duration-300 group-hover:scale-110 sm:h-28 sm:w-28"
+                />
               </span>
               <span className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-xl bg-gradient-to-t from-black/80 to-transparent p-4 text-left text-sm font-medium text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                 {reel.title}
@@ -156,13 +160,5 @@ export function ImageStreamHero({
 
       {children}
     </div>
-  );
-}
-
-function PlayIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.4-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14Z" />
-    </svg>
   );
 }

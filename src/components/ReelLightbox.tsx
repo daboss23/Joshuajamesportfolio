@@ -58,9 +58,9 @@ export function ReelLightbox({ reel, onClose, onStep }: Props) {
           ) : reel.driveId ? (
             <iframe
               key={reel.id}
-              src={`https://drive.google.com/file/d/${reel.driveId}/preview`}
+              src={`https://drive.google.com/file/d/${reel.driveId}/preview?autoplay=1`}
               title={reel.title}
-              allow="autoplay; fullscreen"
+              allow="autoplay; encrypted-media; fullscreen"
               allowFullScreen
               className="h-full w-full border-0"
             />
