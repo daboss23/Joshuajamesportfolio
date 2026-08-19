@@ -65,13 +65,12 @@ export function ParallaxComponent() {
         <img
           ref={portraitRef}
           className="identity-portrait"
-          src="/images/joshua-identity-hero.png"
-          alt="Joshua James looking toward his name inside a violet light ring"
+          src="/images/joshua-cinematic-clean.webp"
+          alt="Joshua James looking toward his name in a cinematic violet light scene"
           fetchPriority="high"
           decoding="async"
         />
         <div className="identity-scrim" aria-hidden="true" />
-        <div className="identity-orbit" aria-hidden="true"><span /><span /></div>
 
         <div ref={copyRef} className="identity-copy">
           <p className="identity-kicker"><span />Motion that moves. Stories that stay.<span /></p>
