@@ -53,6 +53,15 @@ export function ReelLightbox({ reel, onClose, onStep }: Props) {
               loop
               className="h-full w-full object-cover"
             />
+          ) : reel.embedSrc ? (
+            <iframe
+              key={reel.id}
+              src={reel.embedSrc}
+              title={reel.title}
+              allow="autoplay; fullscreen"
+              allowFullScreen
+              className="h-full w-full border-0"
+            />
           ) : (
             <div className="grid h-full place-items-center p-6 text-center text-sm text-mute">
               No video file set for “{reel.title}”. Add a <code>videoSrc</code> in{" "}
