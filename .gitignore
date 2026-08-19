@@ -2,3 +2,7 @@ node_modules
 dist
 *.local
 .DS_Store
+
+# Python bytecode from vendored skill scripts
+__pycache__/
+*.pyc
