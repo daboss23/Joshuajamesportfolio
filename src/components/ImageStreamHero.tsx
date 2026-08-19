@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from "react";
+import { ReelPoster } from "./ReelPoster";
 import type { Reel } from "../data/reels";
 
 type Props = {
@@ -128,11 +129,9 @@ export function ImageStreamHero({
               className="group absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
               style={{ width: 280, height: 498, willChange: "transform, opacity" }}
             >
-              <img
-                src={reel.poster}
-                alt={reel.alt}
+              <ReelPoster
+                reel={reel}
                 loading={i < 4 ? "eager" : "lazy"}
-                draggable={false}
                 className="h-full w-full rounded-xl object-cover shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
               />
               <span className="absolute inset-0 grid place-items-center rounded-xl bg-black/35 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
