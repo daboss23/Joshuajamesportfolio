@@ -63,6 +63,7 @@ body {
   position: relative;
   z-index: 2;
   height: 175svh;
+  margin-top: -100svh;
 }
 
 .identity-stage {
@@ -73,6 +74,8 @@ body {
   min-height: 42rem;
   overflow: hidden;
   isolation: isolate;
+  opacity: 0;
+  will-change: opacity;
 }
 
 .identity-stage::before {
@@ -1164,6 +1167,7 @@ body {
    */
   .identity-scroll {
     height: 100svh;
+    margin-top: 0;
   }
 
   .identity-stage,

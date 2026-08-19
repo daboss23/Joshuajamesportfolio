@@ -40,6 +40,14 @@ export function ParallaxComponent() {
       /* The name and portrait meet quickly, then the composition settles. */
       const meeting = smoothstep(0.015, 0.36, progress);
 
+      /*
+       * This section overlaps the final viewport of the reel wall. Fade the
+       * entire stage in only after it pins so the two full-screen scenes
+       * cross-dissolve instead of exposing a horizontal section edge.
+       */
+      stage.style.opacity = String(enter);
+      stage.style.pointerEvents = enter > 0.72 ? "auto" : "none";
+
       portrait.style.cssText = [
         "opacity:1",
         `transform:translate3d(${1 - meeting * 7}vw, ${(progress - 0.5) * -1.4}vh, 0) scale(${1.01 + meeting * 0.025})`,
