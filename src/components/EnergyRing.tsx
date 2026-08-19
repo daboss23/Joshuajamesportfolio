@@ -6,6 +6,8 @@
  *
  *   halo      a soft bloom that seats the ring in the artwork rather than
  *             leaving it pasted on top of it
+ *   shock     a single hard flash fired by the scene's timeline when the ring
+ *             detonates — the downbeat the name reveal is cut to
  *   waves     concentric rings that expand out of the halo and dissolve —
  *             the "something is radiating from here" cue
  *   spectrum  a radial equaliser: bars stood on the ring's circumference,
@@ -30,6 +32,9 @@ export function EnergyRing() {
   return (
     <div className="energy-ring" aria-hidden="true">
       <div className="energy-halo" />
+      {/* The detonation. Driven by the scene's timeline, not by CSS, because
+          it fires once on a beat rather than looping. */}
+      <div className="energy-shock" />
 
       <div className="energy-waves">
         {Array.from({ length: WAVES }, (_, i) => (

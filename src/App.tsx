@@ -41,7 +41,7 @@ export default function App() {
       {/* Above the cursor trail's layer, so no section can be painted over. */}
       <main id="top" className="relative z-[1]">
         <ScrollShowcase reels={REELS} onSelect={open}>
-          <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-24 text-center sm:py-28">
+          <div className="showcase__copy pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-24 text-center sm:py-28">
             <div className="px-6">
               <h1 className="text-balance text-4xl font-medium tracking-tight text-white [text-shadow:0_2px_30px_rgba(0,0,0,0.95)] sm:text-6xl">
                 Short-form video,

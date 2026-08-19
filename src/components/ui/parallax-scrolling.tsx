@@ -1,157 +1,239 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import { EnergyRing } from "../EnergyRing";
-import { trackScrollProgress } from "../../lib/scroll-progress";
-import { clamp, cue, cueInOut, mix, smootherstep, type Cue } from "../../lib/easing";
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /**
- * The identity reveal: the portrait arrives, the ring ignites behind him, and
- * only then does the name land.
+ * The identity reveal.
  *
- * The scene is written as a storyboard. Every beat is a window on the
- * section's 0→1 scroll progress, and the windows overlap deliberately — a beat
- * starts while the one before it is still finishing, which is what makes the
- * sequence read as one movement instead of a queue of separate fades.
+ * One scrubbed GSAP timeline, pinned. The shape of it is: he arrives out of
+ * the dark, the ring behind him detonates, and the name is *struck* into place
+ * on that shockwave — letter by letter, riding the blast rather than fading up
+ * politely after it.
  *
- * Three things are load-bearing here and easy to undo by accident:
+ * The thing that makes it read as one event rather than a queue of tweens is
+ * that the beats overlap hard and share the shockwave as their downbeat. Every
+ * position parameter below is relative to the `impact` label for that reason:
+ * move the label and the whole reveal re-times around it, which is the only
+ * way this stays adjustable.
  *
- *  1. The portrait's window opens before everything else and closes early, so
- *     he is *established* before a single word appears. That ordering is the
- *     whole point of the scene.
- *  2. Nothing is clipped away at the end. Every layer, the stage included,
- *     runs through `cueInOut` so the composition dissolves before the sticky
- *     stage unpins. Fading only the copy leaves the portrait to be cut off by
- *     the section edge, which is the one seam that gives away that the page is
- *     made of separate sections.
- *  3. Transforms are written with `style.transform`, not `style.cssText`.
- *     Rewriting cssText drops any property the frame does not re-state and
- *     forces the whole declaration to be reparsed every frame.
+ * Written as a timeline rather than a hand-rolled rAF loop because the timing
+ * *is* the design here. `scrub` gives the smoothing for free, and the position
+ * parameters state the choreography in the order it plays.
  */
 
-/** The storyboard. Read top to bottom for the order of the reveal. */
-const CUE = {
-  /** He fades in first, alone. */
-  portrait: [0.0, 0.16] as Cue,
-  /** The ring wakes as he settles, so the energy looks like it belongs to him. */
-  ignite: [0.08, 0.30] as Cue,
-  /** Then the words, in reading order. */
-  kicker: [0.17, 0.26] as Cue,
-  first: [0.21, 0.33] as Cue,
-  last: [0.26, 0.39] as Cue,
-  role: [0.32, 0.43] as Cue,
-  intro: [0.36, 0.48] as Cue,
-  actions: [0.41, 0.53] as Cue,
-  details: [0.45, 0.57] as Cue,
-  /** Everything leaves together, before the stage unpins. */
-  outro: [0.84, 1.0] as Cue,
-} as const;
-
-/**
- * How far a beat travels on its way in, in vh/vw. Kept small: the drama comes
- * from the order and the timing, and a long slide on a big serif headline just
- * reads as the text being late.
- */
-const RISE = 2.4;
+/** Split a word into per-character spans so each letter can be tweened. */
+function Chars({ text, className }: { text: string; className?: string }) {
+  return (
+    <span className={className} aria-hidden="true">
+      {[...text].map((char, i) => (
+        <span className="char" key={i}>
+          <span className="char__inner">{char}</span>
+        </span>
+      ))}
+    </span>
+  );
+}
 
 export function ParallaxComponent() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const portraitRef = useRef<HTMLImageElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
-  const kickerRef = useRef<HTMLParagraphElement>(null);
-  const firstRef = useRef<HTMLSpanElement>(null);
-  const lastRef = useRef<HTMLSpanElement>(null);
-  const roleRef = useRef<HTMLParagraphElement>(null);
-  const introRef = useRef<HTMLParagraphElement>(null);
-  const actionsRef = useRef<HTMLDivElement>(null);
-  const detailsRef = useRef<HTMLDivElement>(null);
-  const cueRef = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
+  useGSAP(
+    () => {
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    return trackScrollProgress(
-      section,
-      (progress) => {
-        const stage = stageRef.current;
-        const portrait = portraitRef.current;
-        const ring = ringRef.current;
-        if (!stage || !portrait || !ring) return;
+      if (reduced) {
+        // The resting state is the finished composition: everything visible,
+        // nothing driven by scroll position.
+        gsap.set(
+          [".identity-portrait", ".identity-orbit", ".identity-kicker", ".char__inner",
+           ".identity-role", ".identity-intro", ".identity-actions", ".identity-details"],
+          { opacity: 1, clearProps: "transform,filter" },
+        );
+        gsap.set(".identity-inner", { opacity: 1 });
+        gsap.set(".identity-scroll-cue", { opacity: 0 });
+        return;
+      }
 
-        const leaving = cue(CUE.outro, progress);
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out" },
+        scrollTrigger: {
+          trigger: root.current,
+          start: "top top",
+          end: "+=260%",
+          // Pinned node stays untouched; every tween below targets its
+          // children. See the note in ScrollShowcase.
+          pin: ".identity-stage",
+          pinSpacing: true,
+          // A little over half a second of catch-up. Enough to absorb a
+          // trackpad flick without the scene feeling detached from the wheel.
+          scrub: 0.6,
+          anticipatePin: 1,
+          // Refreshed after the corridor above it. See the note there.
+          refreshPriority: 0,
+        },
+      });
 
-        /*
-         * The stage carries the cross-dissolve with the reel corridor beneath
-         * it: it is already fading up while the corridor is still receding, so
-         * at no point is either scene alone on screen.
+      /* ---------------------------------------------------------- arrival --
+       * He comes out of the dark: too close, too dim, out of focus, and
+       * settles. `expo.out` spends almost all its travel in the first third of
+       * the tween, so it reads as an arrival that lands rather than a fade
+       * that finishes.
+       */
+      tl.fromTo(
+        ".identity-inner",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.6, ease: "none" },
+        0,
+      )
+        .fromTo(
+          ".identity-portrait",
+          { opacity: 0, scale: 1.42, filter: "blur(26px) brightness(0.25) saturate(0.4)" },
+          {
+            opacity: 1,
+            scale: 1.06,
+            filter: "blur(0px) brightness(1.08) saturate(1.02)",
+            duration: 2.4,
+            ease: "expo.out",
+          },
+          0,
+        )
+        /* A slow counter-drift under everything else, so he is never a still
+           photograph sitting behind moving text. */
+        .to(".identity-portrait", { xPercent: -3, yPercent: -2, scale: 1.12, duration: 10, ease: "none" }, 0)
+
+        .addLabel("impact", 1.5)
+
+        /* ------------------------------------------------------ detonation --
+         * The ring is nothing, then it is everything, in a quarter of the time
+         * anything else takes. `back.out` overshoots the scale so the blast
+         * punches past its resting size and settles back into it.
          */
-        stage.style.opacity = String(mix(0, 1, cue(CUE.portrait, progress)) * (1 - leaving));
-        stage.style.pointerEvents = progress > 0.2 && leaving < 0.4 ? "auto" : "none";
+        .fromTo(
+          ".identity-orbit",
+          { opacity: 0, scale: 0.35 },
+          { opacity: 1, scale: 1, duration: 1.5, ease: "back.out(1.9)" },
+          "impact-=0.35",
+        )
+        .fromTo(
+          ".identity-orbit",
+          { "--energy": 0 },
+          { "--energy": 1, duration: 1.8, ease: "power2.out" },
+          "impact-=0.2",
+        )
+        /* The shockwave itself: one hard flash that outruns the ring and is
+           gone. It is the loudest thing in the scene and lasts the least. */
+        .fromTo(
+          ".energy-shock",
+          { opacity: 0.9, scale: 0.2 },
+          { opacity: 0, scale: 2.6, duration: 1.6, ease: "power2.out" },
+          "impact-=0.1",
+        )
 
-        /* --- the portrait: arrives, settles, and is never cut off --------- */
-        const landing = cue(CUE.portrait, progress);
-        const drift = smootherstep(0, 1, progress);
-        portrait.style.opacity = String(1 - leaving);
-        portrait.style.transform = [
-          // A gentle push left across the whole scene keeps him alive under
-          // the copy. `identity-portrait` carries enough overscan that this
-          // can never expose the frame edge.
-          `translate3d(${mix(1.6, -1.6, drift)}vw, ${mix(2.2, -2.2, drift)}vh, 0)`,
-          // Lands from slightly too close, which is what makes it feel like he
-          // steps into the frame rather than simply appearing in it.
-          `scale(${mix(1.14, 1.03, landing) + leaving * 0.05})`,
-        ].join(" ");
-        portrait.style.filter = `brightness(${mix(0.72, 1.08, landing)}) saturate(${mix(
-          0.6,
-          1.02,
-          landing,
-        )}) contrast(1.02) blur(${mix(9, 0, landing).toFixed(2)}px)`;
+        /* ------------------------------------------------------ the name ----
+         * Struck in, not faded in. Each character starts below its own clip
+         * box, rotated back in 3D, and is driven up onto the baseline. The
+         * stagger is what makes it read as kinetic type rather than a block
+         * of text changing opacity.
+         */
+        .fromTo(
+          ".identity-name--first .char__inner",
+          { yPercent: 118, rotateX: -78, opacity: 0 },
+          {
+            yPercent: 0,
+            rotateX: 0,
+            opacity: 1,
+            duration: 1.5,
+            ease: "expo.out",
+            stagger: { each: 0.09, from: "start" },
+          },
+          "impact",
+        )
+        .fromTo(
+          ".identity-name--last .char__inner",
+          { yPercent: 118, rotateX: -78, opacity: 0 },
+          {
+            yPercent: 0,
+            rotateX: 0,
+            opacity: 1,
+            duration: 1.5,
+            ease: "expo.out",
+            stagger: { each: 0.09, from: "start" },
+          },
+          "impact+=0.45",
+        )
+        /* A specular sweep chasing the last letter home. */
+        .fromTo(
+          ".identity-sheen",
+          { xPercent: -130, opacity: 0 },
+          { xPercent: 130, opacity: 1, duration: 1.9, ease: "power2.inOut" },
+          "impact+=0.9",
+        )
+        .to(".identity-sheen", { opacity: 0, duration: 0.4 }, "impact+=2.4")
 
-        /* --- the ring: ignites behind him, breathes, leaves with him ------ */
-        const energy = cue(CUE.ignite, progress) * (1 - leaving);
-        ring.style.setProperty("--energy", energy.toFixed(3));
-        ring.style.opacity = String(energy);
-        ring.style.transform = `scale(${mix(0.82, 1, cue(CUE.ignite, progress))})`;
+        /* ------------------------------------------- everything else, fast --
+         * Supporting copy is not the show. It arrives close behind the name,
+         * tightly staggered, and gets out of the way.
+         */
+        .fromTo(
+          ".identity-kicker",
+          { opacity: 0, x: -40, filter: "blur(6px)" },
+          { opacity: 1, x: 0, filter: "blur(0px)", duration: 1 },
+          "impact-=0.5",
+        )
+        .fromTo(
+          [".identity-role", ".identity-intro", ".identity-actions"],
+          { opacity: 0, y: 34, filter: "blur(8px)" },
+          { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.1, stagger: 0.22 },
+          "impact+=1.5",
+        )
+        .fromTo(
+          ".identity-details",
+          { opacity: 0, x: 30 },
+          { opacity: 1, x: 0, duration: 1 },
+          "impact+=2",
+        )
+        .to(".identity-scroll-cue", { opacity: 0, duration: 0.5 }, 0.2)
 
-        /* --- the copy: one beat each, in reading order -------------------- */
-        const beat = (
-          node: HTMLElement | null,
-          window: Cue,
-          { x = 0, y = RISE }: { x?: number; y?: number } = {},
-        ) => {
-          if (!node) return;
-          const t = cueInOut(window, CUE.outro, progress);
-          node.style.opacity = String(t);
-          node.style.transform = `translate3d(${mix(x, 0, t)}vw, ${mix(y, 0, t)}vh, 0)`;
-        };
+        /* ------------------------------------------------------- the hold --- */
+        .addLabel("hold", "impact+=3.4")
+        .to({}, { duration: 2.2 }, "hold")
 
-        beat(kickerRef.current, CUE.kicker, { x: -1.1 });
-        beat(firstRef.current, CUE.first, { x: -1.6, y: 3.2 });
-        beat(lastRef.current, CUE.last, { x: 1.6, y: 3.2 });
-        beat(roleRef.current, CUE.role, { x: -0.7 });
-        beat(introRef.current, CUE.intro, { x: -0.7 });
-        beat(actionsRef.current, CUE.actions, { y: 1.8 });
-        beat(detailsRef.current, CUE.details, { x: 1.2 });
-
-        /* The prompt to keep scrolling is only true while there is more to
-           reveal, so it retires as the name lands. */
-        if (cueRef.current) {
-          cueRef.current.style.opacity = String(1 - cue([0.04, 0.18], progress));
-        }
-
-        stage.style.setProperty("--identity-glow", clamp(0.35 + energy * 0.65).toFixed(3));
-      },
-      /* Reduced motion holds the scene at the beat where the whole
-         composition is up and nothing has begun to leave. */
-      { reducedValue: 0.68 },
-    );
-  }, []);
+        /* ------------------------------------------------------- departure --
+         * Nothing is allowed to be clipped away by the pin releasing. The
+         * whole composition leaves under its own power first — copy pulls
+         * back, the ring collapses, he recedes.
+         */
+        .addLabel("out", "hold+=2.2")
+        .to(
+          [".identity-kicker", ".identity-role", ".identity-intro", ".identity-actions", ".identity-details"],
+          { opacity: 0, y: -26, filter: "blur(7px)", duration: 1, stagger: 0.06 },
+          "out",
+        )
+        .to(
+          ".identity-name--first .char__inner, .identity-name--last .char__inner",
+          { yPercent: -110, opacity: 0, duration: 1.1, ease: "power3.in", stagger: { each: 0.04, from: "end" } },
+          "out+=0.15",
+        )
+        .to(".identity-orbit", { opacity: 0, scale: 0.7, duration: 1.2 }, "out+=0.2")
+        .to(
+          ".identity-portrait",
+          { opacity: 0, scale: 1.3, filter: "blur(18px) brightness(0.3) saturate(0.4)", duration: 1.6 },
+          "out+=0.3",
+        )
+        .to(".identity-inner", { opacity: 0, duration: 1, ease: "none" }, "out+=0.9");
+    },
+    { scope: root },
+  );
 
   return (
-    <section ref={sectionRef} className="identity-scroll" aria-labelledby="identity-title">
-      <div ref={stageRef} className="identity-stage">
+    <section ref={root} className="identity-scroll" aria-labelledby="identity-title">
+      <div className="identity-stage">
+        <div className="identity-inner">
         <img
-          ref={portraitRef}
           className="identity-portrait"
           src="/images/joshua-bomber-clean.webp"
           alt="Joshua James in a shearling bomber jacket looking toward his name"
@@ -160,30 +242,33 @@ export function ParallaxComponent() {
         />
         <div className="identity-scrim" aria-hidden="true" />
 
-        <div ref={ringRef} className="identity-orbit">
+        <div className="identity-orbit">
           <EnergyRing />
         </div>
 
         <div className="identity-copy">
-          <p ref={kickerRef} className="identity-kicker">
+          <p className="identity-kicker">
             <span />Motion that moves. Stories that stay.<span />
           </p>
+          {/* The visible name is per-character and hidden from assistive tech;
+              the accessible name comes from aria-label on the heading. */}
           <h2 id="identity-title" aria-label="Joshua James">
-            <span ref={firstRef}>Joshua</span>
-            <span ref={lastRef}>James</span>
+            <Chars text="Joshua" className="identity-name identity-name--first" />
+            <Chars text="James" className="identity-name identity-name--last" />
+            <span className="identity-sheen" aria-hidden="true" />
           </h2>
-          <p ref={roleRef} className="identity-role">Motion designer / visual storyteller</p>
-          <p ref={introRef} className="identity-intro">
+          <p className="identity-role">Motion designer / visual storyteller</p>
+          <p className="identity-intro">
             I shape raw ideas into sharp, cinematic work built to hold attention
             and leave a feeling behind.
           </p>
-          <div ref={actionsRef} className="identity-actions">
+          <div className="identity-actions">
             <a className="identity-primary" href="#selected-work">View my work <span>↗</span></a>
             <a className="identity-secondary" href="#contact">Let’s talk <span>+</span></a>
           </div>
         </div>
 
-        <div ref={detailsRef} className="identity-details">
+        <div className="identity-details">
           <div className="identity-socials" aria-label="Social links">
             <a href="https://www.behance.net/" target="_blank" rel="noreferrer" aria-label="Behance">Be</a>
             <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" aria-label="LinkedIn">in</a>
@@ -192,8 +277,9 @@ export function ParallaxComponent() {
           <p><span className="availability-dot" />Available for select projects</p>
         </div>
 
-        <div ref={cueRef} className="identity-scroll-cue" aria-hidden="true">
+        <div className="identity-scroll-cue" aria-hidden="true">
           <span>Scroll to reveal</span><i />
+        </div>
         </div>
       </div>
     </section>

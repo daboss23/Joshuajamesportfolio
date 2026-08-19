@@ -24,7 +24,9 @@ body {
   color: var(--color-chalk);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  /* `clip`, not `hidden` — see the note on `.identity-stage`. A scroll
+     container here would break every pinned scene on the page. */
+  overflow-x: clip;
 }
 
 /* ---------------------------------------------------------------- showcase */
@@ -42,22 +44,39 @@ body {
 }
 
 /*
- * Scroll budget, not height: the pin below is one screen tall, and the
- * overflow past that screen is how much scrolling the recession gets to play
- * across. 70svh is long enough for the corridor to hold, then dissolve,
- * without turning into a stretch of page where nothing is happening.
+ * Deliberately no height. ScrollTrigger pins the child and inserts a spacer
+ * sized to the pin's duration, and a fixed height here would cap that spacer
+ * and let the next section start early — which is exactly what happened when
+ * this carried `height: 190svh`. The scroll budget lives in the trigger's
+ * `end`, and nowhere else.
  */
 .showcase__hero {
   position: relative;
   z-index: 1;
-  height: 170svh;
 }
 
 .showcase__pin {
-  position: sticky;
-  top: 0;
   height: 100svh;
-  transform-origin: 50% 45%;
+  /*
+   * Clips the rush-past. `.showcase__rush` scales to 1.9 on its way out, which
+   * on a narrow viewport pushes ~170px past the right edge and shows up as
+   * horizontal page scroll. This is the only ancestor that can contain it:
+   * once ScrollTrigger pins this node it is `position: fixed` and has escaped
+   * `.showcase__hero` entirely.
+   *
+   * `clip`, not `hidden` — a scroll container here is what pinning must not
+   * find between itself and the viewport.
+   */
+  overflow: clip;
+}
+
+/* The layer that actually moves. Separate from the pinned wrapper above so
+   ScrollTrigger's pin transform and this tween never share a node. */
+.showcase__rush {
+  height: 100%;
+  /* Slightly above centre: the corridor's vanishing point, so scaling up
+     drives the frames past the viewer rather than off the bottom. */
+  transform-origin: 50% 44%;
   will-change: transform, opacity, filter;
 }
 
@@ -66,27 +85,30 @@ body {
 .identity-scroll {
   position: relative;
   z-index: 2;
-  /*
-   * Nine beats play across this budget (see the storyboard in the identity
-   * scene) and each needs enough scroll to be seen as its own moment. Cut it
-   * back and the reveal collapses into everything arriving at once, which is
-   * the failure this scene is built to avoid.
-   */
-  height: 260svh;
-  /* Pulled up by a full screen so it is already pinned and fading in while
-     the corridor above is still on screen — the two scenes overlap rather
-     than abut. */
-  margin-top: -100svh;
+  /* No height, for the same reason as `.showcase__hero` above: the pin-spacer
+     is what sizes this section, and a fixed height clips it. */
 }
 
 .identity-stage {
   --identity-glow: 0.5;
-  position: sticky;
-  top: 0;
+  position: relative;
   height: 100svh;
   min-height: 42rem;
-  overflow: hidden;
+  /*
+   * `clip` rather than `hidden`. Both contain the overscanned portrait and the
+   * oversized ring, but `hidden` makes this a scroll container, and a scroll
+   * container is exactly what ScrollTrigger must not find between the pin and
+   * the viewport — pinning silently measures against the wrong scroller.
+   */
+  overflow: clip;
   isolation: isolate;
+}
+
+/* Everything the scene fades as a group. The pinned `.identity-stage` above
+   only provides the frame and the clip. */
+.identity-inner {
+  position: absolute;
+  inset: 0;
   opacity: 0;
   will-change: opacity;
 }
@@ -141,18 +163,26 @@ body {
 /* ------------------------------------------------------- the energy ring */
 
 /*
- * Sits behind the portrait's shoulder, roughly where the artwork's own light
- * comes from, so the ring reads as the source of that light rather than as a
- * graphic laid over the photograph. `z-index: -3` puts it behind him: the
- * energy comes out from *around* the silhouette, which is the whole illusion.
+ * Sits over the portrait's shoulder, roughly where the artwork's own light
+ * already comes from, so the ring reads as the source of that light rather
+ * than as a graphic pasted on top of it.
+ *
+ * `mix-blend-mode: screen` is what does that work: the layer's blacks drop out
+ * entirely and only the emitted light survives, so the ring lies *in* the
+ * photograph instead of on it. Stacking it behind the portrait was the obvious
+ * first instinct and it is wrong — the portrait is a full-bleed photo, not a
+ * cutout, so anything behind it is simply invisible.
  */
 .identity-orbit {
   --energy: 0;
   position: absolute;
-  z-index: -3;
-  top: 50%;
-  left: 76%;
-  width: min(46vw, 40rem);
+  z-index: 1;
+  mix-blend-mode: screen;
+  /* Over his head and shoulder, not his chest — the ring has to read as a
+     halo he is standing in front of, so its centre sits above the collar. */
+  top: 30%;
+  left: 79%;
+  width: min(62vw, 54rem);
   aspect-ratio: 1;
   translate: -50% -50%;
   opacity: 0;
@@ -162,6 +192,14 @@ body {
 .energy-ring {
   position: absolute;
   inset: 0;
+  /*
+   * A size container, so the spokes below can be laid out in `cqmin` — units
+   * that resolve against the *ring*, not against each bar's own box. Placing
+   * a spoke on the circumference needs a length in ring units; percentages on
+   * a transform resolve against the transformed element, which collapsed all
+   * 72 bars into a starburst at the centre.
+   */
+  container-type: size;
   /* One shared clock. Every layer below runs off a multiple of this, so the
      waves, the spectrum and the sparks stay phase-locked to each other
      instead of slowly drifting apart into visual noise. */
@@ -187,8 +225,9 @@ body {
 .energy-waves > span {
   position: absolute;
   inset: 0;
-  border: 1px solid rgb(214 128 255 / 0.5);
+  border: 1.5px solid rgb(222 142 255 / 0.75);
   border-radius: 50%;
+  box-shadow: 0 0 30px rgb(198 88 255 / 0.4), inset 0 0 40px rgb(170 70 255 / 0.18);
   opacity: 0;
   /* Negative delay starts each wave already part-way through its cycle, so
      the sequence is fully populated on the first frame rather than taking a
@@ -206,15 +245,18 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 2px;
-  height: calc(6% * var(--reach));
+  width: 2.5px;
+  margin-left: -1.25px;
+  height: calc(9cqmin * var(--reach));
   border-radius: 2px;
-  background: linear-gradient(to top, rgb(255 196 120 / 0.9), rgb(196 84 255 / 0.85) 55%, rgb(120 60 255 / 0));
-  box-shadow: 0 0 10px rgb(198 88 255 / 0.55);
-  opacity: calc(0.25 + var(--energy) * 0.75);
+  background: linear-gradient(to top, rgb(255 208 140 / 0.95), rgb(206 96 255 / 0.9) 55%, rgb(130 70 255 / 0));
+  box-shadow: 0 0 12px rgb(206 96 255 / 0.7);
+  opacity: calc(0.3 + var(--energy) * 0.7);
+  /* Grows outward from the rim, so the ring's edge stays a clean circle and
+     only the bar tips move. */
   transform-origin: 50% 0;
-  /* rotate to the spoke's angle, walk out to the rim, then stand the bar up */
-  transform: rotate(var(--angle)) translateY(46%);
+  /* Rotate to the spoke's angle, then walk out to the circumference. */
+  transform: rotate(var(--angle)) translateY(38cqmin);
   animation: energySpectrum calc(var(--beat) * 0.5) ease-in-out infinite alternate;
   animation-delay: var(--phase);
 }
@@ -251,12 +293,10 @@ body {
  * fading in never forces its neighbours to repaint.
  */
 .identity-kicker,
-.identity-copy h2 span,
 .identity-role,
 .identity-intro,
 .identity-actions,
 .identity-details {
-  opacity: 0;
   will-change: transform, opacity;
 }
 
@@ -275,6 +315,7 @@ body {
 .identity-kicker span { width: 1.7rem; height: 1px; background: linear-gradient(90deg, #e7ab62, #ad50fa); }
 
 .identity-copy h2 {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: fit-content;
@@ -289,7 +330,7 @@ body {
   text-shadow: 0 18px 70px rgb(0 0 0 / 0.8);
 }
 
-.identity-copy h2 span:last-child {
+.identity-name--last {
   margin-left: clamp(1rem, 6vw, 6rem);
   color: transparent;
   -webkit-text-stroke: 1px rgb(233 213 224 / 0.88);
@@ -851,20 +892,20 @@ body {
  */
 @keyframes energyWave {
   0%   { transform: scale(0.28); opacity: 0; }
-  12%  { opacity: calc(0.55 * var(--energy)); }
-  100% { transform: scale(1.9); opacity: 0; }
+  12%  { opacity: calc(0.8 * var(--energy)); }
+  100% { transform: scale(1.75); opacity: 0; }
 }
 
 /* The bar's own length. `translateY` holds it on the rim while it grows. */
 @keyframes energySpectrum {
-  from { transform: rotate(var(--angle)) translateY(46%) scaleY(0.35); }
-  to   { transform: rotate(var(--angle)) translateY(46%) scaleY(1.35); }
+  from { transform: rotate(var(--angle)) translateY(38cqmin) scaleY(0.3); }
+  to   { transform: rotate(var(--angle)) translateY(38cqmin) scaleY(1.5); }
 }
 
 @keyframes energySpark {
-  0%   { transform: rotate(var(--angle)) translateY(24%) scale(0.4); opacity: 0; }
+  0%   { transform: rotate(var(--angle)) translateY(20cqmin) scale(0.4); opacity: 0; }
   18%  { opacity: calc(0.9 * var(--energy)); }
-  100% { transform: rotate(var(--angle)) translateY(112%) scale(1); opacity: 0; }
+  100% { transform: rotate(var(--angle)) translateY(62cqmin) scale(1); opacity: 0; }
 }
 
 @keyframes availabilityPulse { 50% { opacity: 0.38; transform: scale(0.72); } }
@@ -894,16 +935,26 @@ body {
   .site-header::before { inset: 6px 8px; }
   .site-logo > span, .header-nav > a:not(.header-cta) { display: none; }
   .header-cta { margin-right: 0; }
-  .identity-scroll { height: 165svh; }
+  /* No height: ScrollTrigger's pin-spacer sizes this section (see the
+     desktop rule). Setting one here clipped the spacer and let the next
+     section start a screen and a half early. */
   .identity-stage { min-height: 44rem; }
   .identity-stage::before { background-size: 18vw 18vw; opacity: 0.18; }
-  .identity-portrait { inset: -2% -32% -2% -20%; width: 152%; height: 104%; object-position: 62% center; }
+  /* Wider overscan than desktop: the portrait is pushed further on a narrow
+     viewport, and `max-width: none` has to be restated or preflight clamps it
+     back to the stage width. */
+  .identity-portrait { inset: -4% -30%; width: 160%; max-width: none; height: 112%; object-position: 62% center; }
   .identity-scrim { background: linear-gradient(180deg, rgb(2 2 6 / 0.36) 0%, rgb(2 2 6 / 0.2) 35%, rgb(2 2 6 / 0.9) 63%, #020206 100%); }
-  .identity-orbit { top: 12%; right: -18%; width: 88vw; }
+  /* `left`/`translate` on the desktop rule, so the mobile override has to
+     reset `left` rather than only setting `right`. */
+  /* Kept under a viewport wide: the pin wrapper ScrollTrigger inserts around
+     the stage is not itself clipped, so a ring wider than the screen shows up
+     as horizontal page overflow. */
+  .identity-orbit { top: 20%; left: 70%; width: 92vw; }
   .identity-copy { top: auto; left: 1.2rem; right: 1.2rem; bottom: 5.1rem; width: auto; translate: 0; }
   .identity-kicker { margin-bottom: 0.9rem; font-size: 0.49rem; }
   .identity-copy h2 { font-size: clamp(4.4rem, 23vw, 7rem); line-height: 0.75; }
-  .identity-copy h2 span:last-child { margin-left: 1.5rem; }
+  .identity-name--last { margin-left: 1.5rem; }
   .identity-role { margin-top: 1.2rem; }
   .identity-intro { max-width: 26rem; font-size: 0.75rem; line-height: 1.6; }
   .identity-actions { gap: 1.2rem; margin-top: 1.3rem; }
@@ -1234,21 +1285,11 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   /*
-   * Collapse the scroll budget so each stage is exactly one screen and nothing
-   * is driven by scroll position. The stages stay `relative` rather than
-   * `static`: their absolutely-positioned children would otherwise escape and
-   * resolve against the showcase, spilling the columns over the hero.
+   * No ScrollTrigger is created under reduced motion (both scenes bail early),
+   * so nothing pins and the sections are already one screen each. All that is
+   * left is to stop the corridor reserving scroll it no longer animates
+   * across.
    */
-  .identity-scroll {
-    height: 100svh;
-    margin-top: 0;
-  }
-
-  .identity-stage,
-  .showcase__pin {
-    position: relative;
-  }
-
   .showcase__hero {
     height: 100svh;
   }
@@ -1259,4 +1300,67 @@ body {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* ------------------------------------------------- kinetic name reveal */
+
+/*
+ * Each letter is its own clip box with the glyph inside it. The box stays put
+ * and hides the overflow; the inner span is what the timeline drives. That is
+ * what lets a letter rise from *behind its own baseline* rather than simply
+ * moving up from lower on the page — the difference between kinetic type and
+ * text sliding.
+ */
+.identity-name {
+  display: flex;
+}
+
+.identity-name .char {
+  display: block;
+  overflow: hidden;
+  /* Room for the descender and for the 3D rotation to swing through without
+     the clip box shaving the glyph. */
+  padding: 0 0 0.08em;
+  /* Deep enough to read as a real rotation in space, shallow enough that the
+     far edge of a wide letter does not smear. */
+  perspective: 620px;
+}
+
+.identity-name .char__inner {
+  display: block;
+  transform-origin: 50% 0%;
+  will-change: transform, opacity;
+}
+
+/* The specular sweep that chases the last letter home. */
+.identity-sheen {
+  position: absolute;
+  z-index: 1;
+  inset: 0 auto 0 0;
+  width: 42%;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgb(255 240 214 / 0.5) 44%,
+    rgb(232 178 255 / 0.62) 56%,
+    transparent
+  );
+  mix-blend-mode: overlay;
+  filter: blur(7px);
+}
+
+/*
+ * The detonation flash. Sized past the ring so the blast clears it, and no
+ * animation of its own — the identity timeline fires it on a beat.
+ */
+.energy-shock {
+  border-radius: 50%;
+  border: 2px solid rgb(240 198 255 / 0.85);
+  box-shadow:
+    0 0 60px rgb(214 110 255 / 0.75),
+    inset 0 0 70px rgb(196 92 255 / 0.5);
+  opacity: 0;
+  pointer-events: none;
 }

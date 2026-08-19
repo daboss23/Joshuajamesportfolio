@@ -1,9 +1,12 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import { ImageStreamHero } from "./ImageStreamHero";
 import { ParallaxComponent } from "./ui/parallax-scrolling";
-import { trackScrollProgress } from "../lib/scroll-progress";
-import { cue, mix, smootherstep } from "../lib/easing";
 import type { Reel } from "../data/reels";
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 type Props = {
   reels: Reel[];
@@ -12,58 +15,83 @@ type Props = {
 };
 
 /**
- * The hero and the parallax gallery as one continuous scroll stage.
+ * The hero and the identity reveal as one continuous scroll stage.
  *
- * Both are pinned, and the hero hands off by receding — shrinking, blurring and
- * dimming — exactly as the parallax columns rise over it. The overlap is what
- * makes the seam disappear: there is no point at which one section has ended
- * and the next has not yet started.
+ * The handoff is a rush *past* the viewer, not a cross-fade. The corridor is
+ * already a perspective tunnel, so the exit that belongs to it is the one it
+ * was already implying: accelerate, blow past the camera, and be gone. It
+ * scales up and blurs out rather than shrinking away, which reads as travel
+ * rather than as a section politely dimming — the previous version faded and
+ * receded at the same time and felt like watching a light switch.
+ *
+ * The copy leaves first and faster than the frames. Letting the headline ride
+ * the same curve as the tunnel just smears it.
  */
 export function ScrollShowcase({ reels, onSelect, children }: Props) {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const pinRef = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const hero = heroRef.current;
-    const pin = pinRef.current;
-    if (!hero || !pin) return;
+  useGSAP(
+    () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    return trackScrollProgress(hero, (p) => {
-      /*
-       * The corridor holds at full strength for the first third of its budget
-       * and only then begins to leave. Receding from the very first pixel of
-       * scroll is what made the old handoff feel abrupt: the section the user
-       * was still looking at started dimming before anything had arrived to
-       * replace it, so the movement read as a fault rather than as a
-       * transition. Holding first, then dissolving across the same window the
-       * portrait fades up in, turns the two scenes into one cross-dissolve.
-       */
-      const leaving = cue([0.32, 0.94], p);
-      /* Drift is on its own, slower curve so the corridor keeps travelling
-         after it has faded — motion that continues past the dissolve is what
-         sells the recession as depth rather than as an opacity change. */
-      const recede = smootherstep(0, 1, p);
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".showcase__hero",
+          start: "top top",
+          // Explicit, because the section no longer has a height of its own to
+          // measure "bottom" against.
+          end: "+=120%",
+          /*
+           * Pin the wrapper and animate the stage *inside* it. ScrollTrigger
+           * writes its own transform onto whatever it pins, so tweening the
+           * pinned node itself means two systems writing one matrix — the pin
+           * wins and the animation silently does nothing.
+           */
+          pin: ".showcase__pin",
+          pinSpacing: true,
+          scrub: 0.6,
+          anticipatePin: 1,
+          /*
+           * React mounts children before parents, so the identity scene's
+           * trigger is created before this one — the reverse of page order.
+           * ScrollTrigger has to recalculate in page order or the pin-spacer
+           * measurements downstream are taken against stale positions.
+           */
+          refreshPriority: 1,
+        },
+      });
 
-      pin.style.opacity = String(1 - leaving);
-      pin.style.transform = `translate3d(0, ${mix(0, -7, recede).toFixed(2)}vh, 0) scale(${mix(
-        1,
-        0.9,
-        recede,
-      ).toFixed(4)})`;
-      pin.style.filter = `blur(${mix(0, 5, leaving).toFixed(2)}px)`;
-      // Once it has mostly dissolved it is still pinned over the viewport, so
-      // stop it intercepting clicks meant for the scene underneath.
-      pin.style.pointerEvents = leaving > 0.4 ? "none" : "auto";
-    });
-  }, []);
+      // Hold, then go — and the going is fast. A linear fade across the whole
+      // range is what made this feel like nothing was happening for a screen
+      // and a half.
+      tl.to(
+        ".showcase__copy",
+        { opacity: 0, y: -70, filter: "blur(10px)", duration: 0.4, ease: "power2.in" },
+        0.1,
+      ).to(
+        ".showcase__rush",
+        {
+          scale: 1.9,
+          opacity: 0,
+          filter: "blur(14px)",
+          duration: 0.65,
+          ease: "power2.in",
+        },
+        0.35,
+      );
+    },
+    { scope: root },
+  );
 
   return (
-    <div className="showcase" id="work">
-      <div ref={heroRef} className="showcase__hero">
-        <div ref={pinRef} className="showcase__pin">
-          <ImageStreamHero reels={reels} onSelect={onSelect} className="h-full w-full">
-            {children}
-          </ImageStreamHero>
+    <div ref={root} className="showcase" id="work">
+      <div className="showcase__hero">
+        <div className="showcase__pin">
+          <div className="showcase__rush">
+            <ImageStreamHero reels={reels} onSelect={onSelect} className="h-full w-full">
+              {children}
+            </ImageStreamHero>
+          </div>
         </div>
       </div>
 
