@@ -55,10 +55,19 @@ export function ReelLightbox({ reel, onClose, onStep }: Props) {
               loop
               className="h-full w-full object-cover"
             />
+          ) : reel.driveId ? (
+            <iframe
+              key={reel.id}
+              src={`https://drive.google.com/file/d/${reel.driveId}/preview`}
+              title={reel.title}
+              allow="autoplay; fullscreen"
+              allowFullScreen
+              className="h-full w-full border-0"
+            />
           ) : (
             <div className="grid h-full place-items-center p-6 text-center text-sm text-mute">
-              No video file set for “{reel.title}”. Add a <code>videoSrc</code> in{" "}
-              <code>src/data/reels.ts</code>.
+              No video set for “{reel.title}”. Add a <code>videoSrc</code> or{" "}
+              <code>driveId</code> in <code>src/data/reels.ts</code>.
             </div>
           )}
         </div>
