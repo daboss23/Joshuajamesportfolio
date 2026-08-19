@@ -87,6 +87,22 @@ body {
   z-index: 2;
   /* No height, for the same reason as `.showcase__hero` above: the pin-spacer
      is what sizes this section, and a fixed height clips it. */
+
+  /*
+   * Pulled up over the corridor's trailing spacer.
+   *
+   * `pinSpacing` reserves the pinned element's own height *after* the pin
+   * releases, so the corridor — already faded to nothing — spends a full
+   * screen of scrolling drifting upward before this section reaches the top.
+   * Measured, that was ~600px of dead frame between the two scenes, and it is
+   * the single biggest reason the page read as stalling.
+   *
+   * A whole viewport of negative margin cancels exactly that reserved height,
+   * whatever the pin duration is; the extra 15svh buys a genuine overlap, so
+   * the identity stage is already fading up while the corridor is still
+   * rushing past. The two scenes now cross-dissolve instead of queueing.
+   */
+  margin-top: -115svh;
 }
 
 .identity-stage {
@@ -441,7 +457,17 @@ body {
 .portfolio-shell {
   --section-x: clamp(1.25rem, 5vw, 5rem);
   position: relative;
-  z-index: 2;
+  /* Above the identity stage, so it rises over the receding portrait rather
+     than appearing beneath it. */
+  z-index: 3;
+  /*
+   * Pulled up over the identity scene's trailing pin-spacer, for exactly the
+   * reason documented on `.identity-scroll`: ScrollTrigger reserves the pinned
+   * element's own height after the pin releases, and that reserved screen is
+   * dead frame. Every pinned section on this page therefore needs the section
+   * after it to claim that screen back.
+   */
+  margin-top: -100svh;
   overflow: clip;
   border-top: 0;
   background:

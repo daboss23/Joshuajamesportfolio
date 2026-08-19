@@ -40,7 +40,7 @@ export function ScrollShowcase({ reels, onSelect, children }: Props) {
           start: "top top",
           // Explicit, because the section no longer has a height of its own to
           // measure "bottom" against.
-          end: "+=120%",
+          end: "+=95%",
           /*
            * Pin the wrapper and animate the stage *inside* it. ScrollTrigger
            * writes its own transform onto whatever it pins, so tweening the
@@ -66,18 +66,18 @@ export function ScrollShowcase({ reels, onSelect, children }: Props) {
       // and a half.
       tl.to(
         ".showcase__copy",
-        { opacity: 0, y: -70, filter: "blur(10px)", duration: 0.4, ease: "power2.in" },
-        0.1,
+        { opacity: 0, y: -70, filter: "blur(10px)", duration: 0.35, ease: "power2.in" },
+        0.05,
       ).to(
         ".showcase__rush",
         {
           scale: 1.9,
           opacity: 0,
           filter: "blur(14px)",
-          duration: 0.65,
+          duration: 0.8,
           ease: "power2.in",
         },
-        0.35,
+        0.2,
       );
     },
     { scope: root },

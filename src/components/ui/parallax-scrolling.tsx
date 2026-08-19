@@ -63,7 +63,10 @@ export function ParallaxComponent() {
         scrollTrigger: {
           trigger: root.current,
           start: "top top",
-          end: "+=260%",
+          // Tight. Every 100% here is a full screen of wheel travel the viewer
+          // has to spend, so the budget is sized to the beats, not padded to
+          // feel cinematic — 260% left long stretches where nothing moved.
+          end: "+=170%",
           // Pinned node stays untouched; every tween below targets its
           // children. See the note in ScrollShowcase.
           pin: ".identity-stage",
@@ -96,16 +99,22 @@ export function ParallaxComponent() {
             opacity: 1,
             scale: 1.06,
             filter: "blur(0px) brightness(1.08) saturate(1.02)",
-            duration: 2.4,
+            duration: 1.9,
             ease: "expo.out",
           },
           0,
         )
         /* A slow counter-drift under everything else, so he is never a still
            photograph sitting behind moving text. */
-        .to(".identity-portrait", { xPercent: -3, yPercent: -2, scale: 1.12, duration: 10, ease: "none" }, 0)
+        /*
+         * Duration is pinned to the timeline's real end. A drift longer than
+         * the last beat silently extends the timeline, and every extra second
+         * of it is scroll distance where the scene is finished and the viewer
+         * is still turning the wheel.
+         */
+        .to(".identity-portrait", { xPercent: -3, yPercent: -2, scale: 1.12, duration: 5.6, ease: "none" }, 0)
 
-        .addLabel("impact", 1.5)
+        .addLabel("impact", 1)
 
         /* ------------------------------------------------------ detonation --
          * The ring is nothing, then it is everything, in a quarter of the time
@@ -115,22 +124,22 @@ export function ParallaxComponent() {
         .fromTo(
           ".identity-orbit",
           { opacity: 0, scale: 0.35 },
-          { opacity: 1, scale: 1, duration: 1.5, ease: "back.out(1.9)" },
-          "impact-=0.35",
+          { opacity: 1, scale: 1, duration: 1.1, ease: "back.out(1.9)" },
+          "impact-=0.3",
         )
         .fromTo(
           ".identity-orbit",
           { "--energy": 0 },
-          { "--energy": 1, duration: 1.8, ease: "power2.out" },
-          "impact-=0.2",
+          { "--energy": 1, duration: 1.3, ease: "power2.out" },
+          "impact-=0.18",
         )
         /* The shockwave itself: one hard flash that outruns the ring and is
            gone. It is the loudest thing in the scene and lasts the least. */
         .fromTo(
           ".energy-shock",
           { opacity: 0.9, scale: 0.2 },
-          { opacity: 0, scale: 2.6, duration: 1.6, ease: "power2.out" },
-          "impact-=0.1",
+          { opacity: 0, scale: 2.6, duration: 1.2, ease: "power2.out" },
+          "impact-=0.08",
         )
 
         /* ------------------------------------------------------ the name ----
@@ -146,9 +155,9 @@ export function ParallaxComponent() {
             yPercent: 0,
             rotateX: 0,
             opacity: 1,
-            duration: 1.5,
+            duration: 1.15,
             ease: "expo.out",
-            stagger: { each: 0.09, from: "start" },
+            stagger: { each: 0.07, from: "start" },
           },
           "impact",
         )
@@ -159,20 +168,20 @@ export function ParallaxComponent() {
             yPercent: 0,
             rotateX: 0,
             opacity: 1,
-            duration: 1.5,
+            duration: 1.15,
             ease: "expo.out",
-            stagger: { each: 0.09, from: "start" },
+            stagger: { each: 0.07, from: "start" },
           },
-          "impact+=0.45",
+          "impact+=0.32",
         )
         /* A specular sweep chasing the last letter home. */
         .fromTo(
           ".identity-sheen",
           { xPercent: -130, opacity: 0 },
-          { xPercent: 130, opacity: 1, duration: 1.9, ease: "power2.inOut" },
-          "impact+=0.9",
+          { xPercent: 130, opacity: 1, duration: 1.4, ease: "power2.inOut" },
+          "impact+=0.7",
         )
-        .to(".identity-sheen", { opacity: 0, duration: 0.4 }, "impact+=2.4")
+        .to(".identity-sheen", { opacity: 0, duration: 0.4 }, "impact+=1.9")
 
         /* ------------------------------------------- everything else, fast --
          * Supporting copy is not the show. It arrives close behind the name,
@@ -181,50 +190,54 @@ export function ParallaxComponent() {
         .fromTo(
           ".identity-kicker",
           { opacity: 0, x: -40, filter: "blur(6px)" },
-          { opacity: 1, x: 0, filter: "blur(0px)", duration: 1 },
-          "impact-=0.5",
+          { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.8 },
+          "impact-=0.4",
         )
         .fromTo(
           [".identity-role", ".identity-intro", ".identity-actions"],
           { opacity: 0, y: 34, filter: "blur(8px)" },
-          { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.1, stagger: 0.22 },
-          "impact+=1.5",
+          { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.85, stagger: 0.16 },
+          "impact+=1",
         )
         .fromTo(
           ".identity-details",
           { opacity: 0, x: 30 },
-          { opacity: 1, x: 0, duration: 1 },
-          "impact+=2",
+          { opacity: 1, x: 0, duration: 0.8 },
+          "impact+=1.35",
         )
         .to(".identity-scroll-cue", { opacity: 0, duration: 0.5 }, 0.2)
 
-        /* ------------------------------------------------------- the hold --- */
-        .addLabel("hold", "impact+=3.4")
-        .to({}, { duration: 2.2 }, "hold")
+        /* ------------------------------------------------------- the hold ---
+         * Long enough to read the finished composition, and no longer. The
+         * previous 2.2s of empty tween was ~500px of scrolling against a
+         * static frame, which is most of what read as the scene stalling.
+         */
+        .addLabel("hold", "impact+=2.5")
+        .to({}, { duration: 0.6 }, "hold")
 
         /* ------------------------------------------------------- departure --
          * Nothing is allowed to be clipped away by the pin releasing. The
          * whole composition leaves under its own power first — copy pulls
          * back, the ring collapses, he recedes.
          */
-        .addLabel("out", "hold+=2.2")
+        .addLabel("out", "hold+=0.6")
         .to(
           [".identity-kicker", ".identity-role", ".identity-intro", ".identity-actions", ".identity-details"],
-          { opacity: 0, y: -26, filter: "blur(7px)", duration: 1, stagger: 0.06 },
+          { opacity: 0, y: -26, filter: "blur(7px)", duration: 0.7, stagger: 0.05 },
           "out",
         )
         .to(
           ".identity-name--first .char__inner, .identity-name--last .char__inner",
-          { yPercent: -110, opacity: 0, duration: 1.1, ease: "power3.in", stagger: { each: 0.04, from: "end" } },
+          { yPercent: -110, opacity: 0, duration: 0.8, ease: "power3.in", stagger: { each: 0.03, from: "end" } },
           "out+=0.15",
         )
-        .to(".identity-orbit", { opacity: 0, scale: 0.7, duration: 1.2 }, "out+=0.2")
+        .to(".identity-orbit", { opacity: 0, scale: 0.7, duration: 0.9 }, "out+=0.15")
         .to(
           ".identity-portrait",
-          { opacity: 0, scale: 1.3, filter: "blur(18px) brightness(0.3) saturate(0.4)", duration: 1.6 },
-          "out+=0.3",
+          { opacity: 0, scale: 1.3, filter: "blur(18px) brightness(0.3) saturate(0.4)", duration: 1.1 },
+          "out+=0.25",
         )
-        .to(".identity-inner", { opacity: 0, duration: 1, ease: "none" }, "out+=0.9");
+        .to(".identity-inner", { opacity: 0, duration: 0.7, ease: "none" }, "out+=0.7");
     },
     { scope: root },
   );
