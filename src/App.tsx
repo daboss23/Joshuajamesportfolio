@@ -6,6 +6,7 @@ import { ReelLightbox } from "./components/ReelLightbox";
 import { ScrollShowcase } from "./components/ScrollShowcase";
 import { PortfolioSections } from "./components/PortfolioSections";
 import { ArrivalScene } from "./components/ArrivalScene";
+import { ScrollCue } from "./components/ScrollCue";
 import TubesCursor from "./components/ui/tubes-cursor";
 import { REELS, type Reel } from "./data/reels";
 
@@ -51,9 +52,7 @@ export default function App() {
               </h1>
             </div>
             <div className="flex flex-col items-center gap-3 px-6">
-              <p className="max-w-md text-balance text-sm text-white/70 [text-shadow:0_2px_20px_rgba(0,0,0,0.95)]">
-                Tap any frame to play it — or keep scrolling.
-              </p>
+              <ScrollCue />
               <CursorHint />
             </div>
           </div>
