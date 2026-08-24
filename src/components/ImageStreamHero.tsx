@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from "react";
+import { PlayGlass } from "./PlayGlass";
 import { ReelPoster } from "./ReelPoster";
 import type { Reel } from "../data/reels";
 
@@ -135,13 +136,7 @@ export function ImageStreamHero({
                 className="h-full w-full rounded-xl object-cover shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
               />
               <span className="pointer-events-none absolute inset-0 grid place-items-center rounded-xl bg-black/10 transition-colors duration-300 group-hover:bg-black/20">
-                <img
-                  src="/images/neon-play-button.png"
-                  alt=""
-                  aria-hidden="true"
-                  draggable={false}
-                  className="h-24 w-24 object-contain drop-shadow-[0_0_24px_rgba(118,56,255,0.5)] transition-transform duration-300 group-hover:scale-110 sm:h-28 sm:w-28"
-                />
+                <PlayGlass />
               </span>
               <span className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-xl bg-gradient-to-t from-black/80 to-transparent p-4 text-left text-sm font-medium text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                 {reel.title}

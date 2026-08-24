@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { PlayGlass } from "./PlayGlass";
 
 const SERVICES = [
   ["01", "Short-form edits", "Scroll-stopping cuts shaped around the hook, the beat and the second watch."],
@@ -195,7 +196,7 @@ export function PortfolioSections() {
           <div className="about-frame">
             <img src="/thumbs/bird-hand.svg" alt="Abstract violet and amber motion artwork" loading="lazy" />
             <a className="play-orb" href="#work" aria-label="Return to the showreel">
-              <span>▶</span>
+              <PlayGlass />
             </a>
             <div className="visual-caption">
               <span>Showreel ’26</span><span>01:14</span>
