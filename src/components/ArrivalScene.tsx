@@ -158,7 +158,6 @@ export function ArrivalScene() {
         gsap.set(".arrival-char", { opacity: 1, x: 0, y: 0, rotate: 0, rotateY: 0, scale: 1 });
         gsap.set(".arrival__line", { filter: "blur(0px)" });
         gsap.set([".arrival__eyebrow", ".arrival__kicker", ".arrival__blurb"], { opacity: 1, y: 0 });
-        gsap.set(".arrival__rule", { scaleX: 1 });
         return;
       }
 
@@ -227,7 +226,7 @@ export function ArrivalScene() {
            * its own rate rather than under the thumb, so the scene only has to
            * last as long as the name takes to assemble.
            */
-          end: mode === "scrub" ? "+=200%" : "+=150%",
+          end: mode === "scrub" ? "+=280%" : "+=220%",
           // Pin the frame, animate its contents. ScrollTrigger owns the
           // transform on whatever it pins — see the note in ScrollShowcase.
           pin: ".arrival__stage",
@@ -336,28 +335,22 @@ export function ArrivalScene() {
           1.32,
         )
         /* --------------------------------------------------- the pre-heads --
-         * The eyebrow leads the lockup in by a beat, its rules drawing out
-         * from the text; the role line and the blurb answer underneath once
-         * the last letter has landed, so the block builds top to bottom
-         * around the name rather than arriving with it.
+         * Held back until the lockup is on the baseline. Leading the name in
+         * put the eyebrow on screen while the letters were still scattered,
+         * which read as a caption for nothing; now the name lands first and
+         * the two labels close around it, top then bottom.
          */
         .fromTo(
           ".arrival__eyebrow",
           { opacity: 0, y: 18 },
           { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" },
-          0.75,
-        )
-        .fromTo(
-          ".arrival__rule",
-          { scaleX: 0 },
-          { scaleX: 1, duration: 1.1, ease: "power3.out", stagger: 0.08 },
-          0.85,
+          2.65,
         )
         .fromTo(
           [".arrival__kicker", ".arrival__blurb"],
           { opacity: 0, y: 26 },
           { opacity: 1, y: 0, duration: 1, ease: "power2.out", stagger: 0.14 },
-          2.5,
+          3.05,
         )
 
         /* A specular sweep across the finished lockup, timed to the last
@@ -374,7 +367,7 @@ export function ArrivalScene() {
          * He is arrived, the name is set. Half a beat to read it, and no more:
          * every unit here is scroll the viewer spends on a still frame.
          */
-        .addLabel("landed", 3.05)
+        .addLabel("landed", 4.05)
         .to({}, { duration: 0.55 }, "landed")
 
         /* -------------------------------------------------------- handover --
@@ -390,14 +383,19 @@ export function ArrivalScene() {
         )
         .to(".arrival__video", { scale: 1.14, duration: 1.05, ease: "power2.in" }, "out")
         /*
-         * Eased, not linear, and finished a beat before the timeline ends.
-         * The portfolio is fully painted underneath by now, so a linear fade
-         * spends its whole length with two compositions equally visible;
-         * `power2.in` holds the scene and then gets out of the way. Ending
-         * early matters too — a scrubbed playhead lags the wheel, and a pin
-         * released on a scene still half visible is a visible slide.
+         * Eased, not linear. The portfolio is fully painted underneath by
+         * now, so a linear fade spends its whole length with two compositions
+         * equally visible; `power2.in` holds the scene and then gets out of
+         * the way.
+         *
+         * Long, and followed by a hold on the section it reveals. The pin is
+         * still up through both, so the viewer crosses into the next section
+         * and gets a beat to read it before the page starts moving again — a
+         * short dissolve straight into an unpin dumped them into a section
+         * they never saw arrive.
          */
-        .to(".arrival__inner", { opacity: 0, duration: 0.55, ease: "power2.in" }, "out+=0.35");
+        .to(".arrival__inner", { opacity: 0, duration: 1.5, ease: "power2.in" }, "out+=0.35")
+        .to({}, { duration: 1.1 });
 
       /* Touch: the clip is played once, on arrival, and left on its last
          frame. The name still rides the scroll. */
@@ -450,11 +448,7 @@ export function ArrivalScene() {
             accessible name comes from aria-label on the heading.
           */}
           <div className="arrival__nameblock">
-            <p className="arrival__eyebrow">
-              <span className="arrival__rule" aria-hidden="true" />
-              {EYEBROW}
-              <span className="arrival__rule" aria-hidden="true" />
-            </p>
+            <p className="arrival__eyebrow">{EYEBROW}</p>
 
             <h2 id="arrival-title" className="arrival__name" aria-label="Joshua James">
               <Letters text={FIRST} className="arrival__line arrival__line--first" />

@@ -75,6 +75,7 @@ body {
 /* The layer that actually moves. Separate from the pinned wrapper above so
    ScrollTrigger's pin transform and this tween never share a node. */
 .showcase__rush {
+  position: relative;
   height: 100%;
   /* Slightly above centre: the corridor's vanishing point, so scaling up
      drives the frames past the viewer rather than off the bottom. */
@@ -231,20 +232,6 @@ body {
   text-transform: uppercase;
   text-shadow: 0 2px 20px rgb(0 0 0 / 0.9);
   opacity: 0;
-}
-
-.arrival__rule {
-  width: clamp(1.6rem, 3vw, 2.8rem);
-  height: 1px;
-  flex: none;
-  background: rgb(241 234 234 / 0.5);
-  /* Drawn out from the text on both sides, so each rule scales from its own
-     inner edge. */
-  transform-origin: right center;
-}
-
-.arrival__rule:last-child {
-  transform-origin: left center;
 }
 
 .arrival__kicker {

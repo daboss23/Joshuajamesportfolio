@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { ImageStreamHero } from "./ImageStreamHero";
+import { StarsBackground } from "./ui/stars";
 import type { Reel } from "../data/reels";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -87,6 +88,9 @@ export function ScrollShowcase({ reels, onSelect, children }: Props) {
       <div className="showcase__hero">
         <div className="showcase__pin">
           <div className="showcase__rush">
+            {/* The room the corridor sits in. Inside the rush layer, so the
+                sky travels past the viewer on the exit with everything else. */}
+            <StarsBackground speed={14} factor={0.04} starColor="#c6f8ff" />
             <ImageStreamHero reels={reels} onSelect={onSelect} className="h-full w-full">
               {children}
             </ImageStreamHero>
