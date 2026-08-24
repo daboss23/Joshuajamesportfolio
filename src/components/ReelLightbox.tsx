@@ -56,26 +56,26 @@ export function ReelLightbox({ reel, onClose, onStep }: Props) {
               className="h-full w-full object-cover"
             />
           ) : reel.driveId ? (
-            <>
-              <iframe
-                key={reel.id}
-                src={`https://drive.google.com/file/d/${reel.driveId}/preview?autoplay=1`}
-                title={reel.title}
-                allow="autoplay; encrypted-media; fullscreen"
-                allowFullScreen
-                className="h-full w-full border-0"
-              />
-              {/*
-                Covers Drive's "open in new window" button.
+            /*
+              Drive's chrome, pushed out of frame rather than painted over.
 
-                The player is a cross-origin iframe, so its chrome cannot be
-                styled or scripted away from here — the only thing that reaches
-                it is something painted on top. The patch matches the player's
-                own black and swallows the click, so the reel stays in the
-                lightbox instead of bouncing the viewer out to Drive.
-              */}
-              <div className="absolute right-0 top-0 h-16 w-16 bg-black" />
-            </>
+              The player is cross-origin, so its "open in new window" button
+              cannot be hidden from here — but it is pinned to the top right of
+              the *iframe*, while the clip itself is centred inside it. So the
+              iframe is run far wider than the frame and centred: the reel is
+              still height-fitted and dead centre, and the chrome now sits out
+              in the pillarbox either side, which this container clips off. A
+              patch over the corner was the earlier attempt and showed as a
+              black square whenever the frame under it was not black.
+            */
+            <iframe
+              key={reel.id}
+              src={`https://drive.google.com/file/d/${reel.driveId}/preview?autoplay=1`}
+              title={reel.title}
+              allow="autoplay; encrypted-media; fullscreen"
+              allowFullScreen
+              className="absolute left-1/2 top-0 h-full w-[230%] -translate-x-1/2 border-0"
+            />
           ) : (
             <div className="grid h-full place-items-center p-6 text-center text-sm text-mute">
               No video set for “{reel.title}”. Add a <code>videoSrc</code> or{" "}
