@@ -56,14 +56,26 @@ export function ReelLightbox({ reel, onClose, onStep }: Props) {
               className="h-full w-full object-cover"
             />
           ) : reel.driveId ? (
-            <iframe
-              key={reel.id}
-              src={`https://drive.google.com/file/d/${reel.driveId}/preview?autoplay=1`}
-              title={reel.title}
-              allow="autoplay; encrypted-media; fullscreen"
-              allowFullScreen
-              className="h-full w-full border-0"
-            />
+            <>
+              <iframe
+                key={reel.id}
+                src={`https://drive.google.com/file/d/${reel.driveId}/preview?autoplay=1`}
+                title={reel.title}
+                allow="autoplay; encrypted-media; fullscreen"
+                allowFullScreen
+                className="h-full w-full border-0"
+              />
+              {/*
+                Covers Drive's "open in new window" button.
+
+                The player is a cross-origin iframe, so its chrome cannot be
+                styled or scripted away from here — the only thing that reaches
+                it is something painted on top. The patch matches the player's
+                own black and swallows the click, so the reel stays in the
+                lightbox instead of bouncing the viewer out to Drive.
+              */}
+              <div className="absolute right-0 top-0 h-16 w-16 bg-black" />
+            </>
           ) : (
             <div className="grid h-full place-items-center p-6 text-center text-sm text-mute">
               No video set for “{reel.title}”. Add a <code>videoSrc</code> or{" "}
