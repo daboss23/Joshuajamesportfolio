@@ -396,6 +396,223 @@ body {
 .identity-scroll-cue span { color: rgb(255 255 255 / 0.42); font-size: 0.52rem; letter-spacing: 0.2em; text-transform: uppercase; }
 .identity-scroll-cue i { width: 1px; height: 2.4rem; background: linear-gradient(#e7ad6c, transparent); animation: scrollCue 1.8s ease-in-out infinite; }
 
+/* --------------------------------------------------------------- arrival */
+
+/*
+ * The scene the identity reveal hands off to: the clip he walks back out of,
+ * with the name thrown in from the side of frame he leaves empty.
+ */
+.arrival {
+  position: relative;
+  /*
+   * Above `.portfolio-shell`, which is the one place this page breaks its own
+   * ascending-z convention — and deliberately.
+   *
+   * Every pinned section here is followed by a section pulled up over its
+   * trailing spacer, and that pull starts *during* the pin: by the halfway
+   * point the next section's top edge is already inside the viewport, climbing
+   * over the pinned scene from below. That is invisible while the thing
+   * climbing is transparent, and the portfolio shell very nearly is — but its
+   * about-card is not, and it slid up across the landed name like a window
+   * shade. Owning the stacking instead means the scene holds the full frame
+   * until its own timeline fades it, and the portfolio is simply revealed
+   * underneath.
+   */
+  z-index: 4;
+  /*
+   * Same cancellation as `.identity-scroll` above, for the same reason: the
+   * identity pin reserves its own height after releasing, and without this the
+   * page spends a screen of scrolling on a scene that has already faded out.
+   * The extra overlap lets this one fade up while that one is still leaving.
+   */
+  /*
+   * Measured, not guessed: the identity scene fades its own group out over the
+   * last ~13% of its pin, and this scene's fade-in takes ~11% of its own. A
+   * 100svh cancellation put those two windows end to end and left ~250px of
+   * scrolling where both scenes were nearly transparent and the page was
+   * black. Starting a little over a screen and a quarter early overlaps them
+   * instead, so the portrait dissolves into the clip it came from.
+   */
+  margin-top: -128svh;
+}
+
+.arrival__stage {
+  position: relative;
+  height: 100svh;
+  min-height: 38rem;
+  /* Nothing in the scene is interactive, and once it has faded it still
+     overlaps the top screen of the portfolio for as long as the pin's own
+     height takes to scroll past. It must not swallow those clicks. */
+  pointer-events: none;
+  /* `clip`, not `hidden` — a scroll container between the pin and the viewport
+     is what breaks pinning. See the note on `.identity-stage`. */
+  overflow: clip;
+  isolation: isolate;
+}
+
+/* The group the scene fades as one. The pinned `.arrival__stage` only carries
+   the frame and the clip. */
+.arrival__inner {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  will-change: opacity;
+}
+
+/*
+ * Full-bleed, and held to the right. The clip lands with him right of centre
+ * and the left third empty; `object-position` keeps that composition when a
+ * viewport narrower than 16:9 crops the sides, which is the difference between
+ * the name sitting in open frame and sitting across his chest.
+ *
+ * Only ever scaled *up* (the handover pushes it to 1.14), so no overscan is
+ * needed to keep the edges outside the stage.
+ */
+.arrival__video {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Preflight's `img { max-width: 100% }` would clamp this back. */
+  max-width: none;
+  object-fit: cover;
+  object-position: 64% 50%;
+  will-change: transform;
+}
+
+/*
+ * Reads the name against the footage. Weighted to the left because that is
+ * where the type lands, and lifted off the bottom so the outline of JAMES does
+ * not have to survive whatever the shards are doing down there.
+ */
+.arrival__scrim {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgb(3 2 8 / 0.86) 0%, rgb(3 2 8 / 0.55) 34%, rgb(3 2 8 / 0) 62%),
+    linear-gradient(to top, rgb(3 2 8 / 0.72), rgb(3 2 8 / 0) 42%);
+}
+
+/* Placement only — see the note in ArrivalScene for why this is not the same
+   node as the heading it holds. */
+.arrival__nameblock {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: clamp(1.4rem, 5vw, 5.5rem);
+  translate: 0 -50%;
+  /* The letters rotate on Y on their way in; without a perspective on the
+     block they would flatten into a horizontal squash. */
+  perspective: 1000px;
+}
+
+.arrival__name {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  margin: 0;
+  color: #f1eaea;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3.2rem, 8vw, 8.6rem);
+  font-weight: 400;
+  line-height: 0.78;
+  letter-spacing: -0.07em;
+  text-transform: uppercase;
+  text-shadow: 0 18px 70px rgb(0 0 0 / 0.85);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.arrival__line {
+  display: flex;
+  will-change: filter;
+}
+
+.arrival__line--last {
+  margin-left: clamp(0.8rem, 4.5vw, 4.6rem);
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(236 216 228 / 0.9);
+}
+
+/*
+ * Each letter is its own transform target — they arrive from different
+ * distances, angles and sizes — so each one gets its own layer rather than
+ * forcing a repaint of the whole line every frame.
+ */
+.arrival-char {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/*
+ * The specular pass over the finished lockup — the same build as
+ * `.identity-sheen`, deliberately: narrow, blurred and translucent at both
+ * ends. A full-width band with hard stops does not read as light on this
+ * footage, it reads as a grey rectangle sliding across his chest.
+ */
+.arrival__sheen {
+  position: absolute;
+  z-index: 3;
+  inset: 0 auto 0 0;
+  width: 42%;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgb(255 240 214 / 0.42) 44%,
+    rgb(232 178 255 / 0.5) 56%,
+    transparent
+  );
+  /*
+   * `color-dodge`, not `overlay`. Every additive or lightening blend mode
+   * lifts pure black to grey, so over this footage an overlay band was a grey
+   * rectangle sliding across the frame with the letters incidental to it.
+   * Dodge divides by the inverse of the blend colour: black stays black no
+   * matter what is passed over it, and only pixels that are already lit — the
+   * face of JOSHUA and the stroke of JAMES — blow out. The light lands on the
+   * type instead of on the frame.
+   */
+  mix-blend-mode: color-dodge;
+  filter: blur(9px);
+  /* The gradient only fades left to right; the mask takes off the band's flat
+     top and bottom edges. */
+  mask-image: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+  opacity: 0;
+}
+
+@media (max-width: 767px) {
+  /* Portrait crops the frame to him, so there is no empty side to land in:
+     the name centres over the clip and the scrim carries the contrast. */
+  .arrival__nameblock {
+    /* Lower than centre: the portrait crop puts his face where the lockup
+       would otherwise sit, and the name reads better across the collar. */
+    top: 60%;
+    right: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .arrival__name {
+    align-items: center;
+    font-size: clamp(2.8rem, 15vw, 5.4rem);
+  }
+
+  .arrival__line--last { margin-left: 0; }
+
+  .arrival__video { object-position: 56% 50%; }
+
+  .arrival__scrim {
+    background:
+      linear-gradient(rgb(3 2 8 / 0.55), rgb(3 2 8 / 0.2) 40%, rgb(3 2 8 / 0.78)),
+      radial-gradient(ellipse at 50% 50%, rgb(3 2 8 / 0.55), transparent 70%);
+  }
+}
+
 /* ---------------------------------------------------------- portfolio body */
 
 :root {
@@ -1318,6 +1535,19 @@ body {
    */
   .showcase__hero {
     height: 100svh;
+  }
+
+  /*
+   * Same reasoning, one step further. Every negative `margin-top` below the
+   * corridor cancels a pin-spacer that only exists while something is pinned;
+   * with no pins there is nothing to cancel, and the margins pull each scene
+   * up over the one before it — the identity portrait landing across the
+   * services grid.
+   */
+  .identity-scroll,
+  .arrival,
+  .portfolio-shell {
+    margin-top: 0;
   }
 
   *,

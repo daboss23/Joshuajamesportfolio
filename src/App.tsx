@@ -5,6 +5,7 @@ import { ScrollProgress } from "./components/ScrollProgress";
 import { ReelLightbox } from "./components/ReelLightbox";
 import { ScrollShowcase } from "./components/ScrollShowcase";
 import { PortfolioSections } from "./components/PortfolioSections";
+import { ArrivalScene } from "./components/ArrivalScene";
 import TubesCursor from "./components/ui/tubes-cursor";
 import { REELS, type Reel } from "./data/reels";
 
@@ -57,6 +58,8 @@ export default function App() {
             </div>
           </div>
         </ScrollShowcase>
+
+        <ArrivalScene />
 
         <PortfolioSections />
       </main>
