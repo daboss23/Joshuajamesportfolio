@@ -3,6 +3,7 @@ import { ImageStreamHero } from "./components/ImageStreamHero";
 import { ReelGrid } from "./components/ReelGrid";
 import { ReelLightbox } from "./components/ReelLightbox";
 import { TubesCursor } from "./components/TubesCursor";
+import ScrollExpandMedia from "./components/ui/scroll-expansion-hero";
 import { REELS, type Reel } from "./data/reels";
 
 export default function App() {
@@ -32,6 +33,23 @@ export default function App() {
       </header>
 
       <main id="top" className="relative z-[1]">
+        <ScrollExpandMedia
+          mediaType="image"
+          mediaSrc={REELS[0].poster}
+          bgImageSrc="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1920&auto=format&fit=crop"
+          title="Joshua James"
+          date="Short-form video"
+          scrollToExpand="Scroll to expand"
+          textBlend
+        >
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-lg leading-relaxed text-mute">
+              Hooks, pacing, colour and sound design for brands that live on
+              TikTok, Reels and Shorts — keep scrolling for the reels.
+            </p>
+          </div>
+        </ScrollExpandMedia>
+
         <ImageStreamHero
           reels={REELS}
           onSelect={open}
