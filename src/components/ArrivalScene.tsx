@@ -33,6 +33,11 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 const FIRST = "JOSHUA";
 const LAST = "JAMES";
 
+const EYEBROW = "Motion that moves. Stories that stay.";
+const KICKER = "Motion designer / visual storyteller";
+const BLURB =
+  "I shape raw ideas into sharp, cinematic work built to hold attention and leave a feeling behind.";
+
 const SCRUB_SRC = "/videos/identity-arrival.mp4";
 /*
  * Same clip, VP9. Only ever reached by a browser that cannot demux the H.264 —
@@ -152,6 +157,8 @@ export function ArrivalScene() {
         gsap.set(".arrival__name", { opacity: 1, xPercent: 0 });
         gsap.set(".arrival-char", { opacity: 1, x: 0, y: 0, rotate: 0, rotateY: 0, scale: 1 });
         gsap.set(".arrival__line", { filter: "blur(0px)" });
+        gsap.set([".arrival__eyebrow", ".arrival__kicker", ".arrival__blurb"], { opacity: 1, y: 0 });
+        gsap.set(".arrival__rule", { scaleX: 1 });
         return;
       }
 
@@ -328,6 +335,31 @@ export function ArrivalScene() {
           },
           1.32,
         )
+        /* --------------------------------------------------- the pre-heads --
+         * The eyebrow leads the lockup in by a beat, its rules drawing out
+         * from the text; the role line and the blurb answer underneath once
+         * the last letter has landed, so the block builds top to bottom
+         * around the name rather than arriving with it.
+         */
+        .fromTo(
+          ".arrival__eyebrow",
+          { opacity: 0, y: 18 },
+          { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" },
+          0.75,
+        )
+        .fromTo(
+          ".arrival__rule",
+          { scaleX: 0 },
+          { scaleX: 1, duration: 1.1, ease: "power3.out", stagger: 0.08 },
+          0.85,
+        )
+        .fromTo(
+          [".arrival__kicker", ".arrival__blurb"],
+          { opacity: 0, y: 26 },
+          { opacity: 1, y: 0, duration: 1, ease: "power2.out", stagger: 0.14 },
+          2.5,
+        )
+
         /* A specular sweep across the finished lockup, timed to the last
            letter landing. */
         .fromTo(
@@ -351,6 +383,11 @@ export function ArrivalScene() {
          */
         .addLabel("out", "landed+=0.6")
         .to(".arrival__name", { yPercent: -14, opacity: 0, duration: 0.75, ease: "power2.in" }, "out")
+        .to(
+          [".arrival__eyebrow", ".arrival__kicker", ".arrival__blurb"],
+          { y: -22, opacity: 0, duration: 0.75, ease: "power2.in" },
+          "out",
+        )
         .to(".arrival__video", { scale: 1.14, duration: 1.05, ease: "power2.in" }, "out")
         /*
          * Eased, not linear, and finished a beat before the timeline ends.
@@ -413,11 +450,20 @@ export function ArrivalScene() {
             accessible name comes from aria-label on the heading.
           */}
           <div className="arrival__nameblock">
+            <p className="arrival__eyebrow">
+              <span className="arrival__rule" aria-hidden="true" />
+              {EYEBROW}
+              <span className="arrival__rule" aria-hidden="true" />
+            </p>
+
             <h2 id="arrival-title" className="arrival__name" aria-label="Joshua James">
               <Letters text={FIRST} className="arrival__line arrival__line--first" />
               <Letters text={LAST} className="arrival__line arrival__line--last" />
               <span className="arrival__sheen" aria-hidden="true" />
             </h2>
+
+            <p className="arrival__kicker">{KICKER}</p>
+            <p className="arrival__blurb">{BLURB}</p>
           </div>
         </div>
       </div>

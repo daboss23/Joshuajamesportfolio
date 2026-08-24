@@ -216,6 +216,58 @@ body {
   will-change: transform, opacity;
 }
 
+/* The pre-headlines bracketing the lockup. Display caps at wide tracking so
+   they read as system labels against the serif name, never as a second
+   headline competing with it. */
+.arrival__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 0 0 clamp(1rem, 2vw, 1.6rem);
+  color: rgb(241 234 234 / 0.82);
+  font-family: var(--font-display);
+  font-size: clamp(0.58rem, 0.9vw, 0.72rem);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 20px rgb(0 0 0 / 0.9);
+  opacity: 0;
+}
+
+.arrival__rule {
+  width: clamp(1.6rem, 3vw, 2.8rem);
+  height: 1px;
+  flex: none;
+  background: rgb(241 234 234 / 0.5);
+  /* Drawn out from the text on both sides, so each rule scales from its own
+     inner edge. */
+  transform-origin: right center;
+}
+
+.arrival__rule:last-child {
+  transform-origin: left center;
+}
+
+.arrival__kicker {
+  margin: clamp(1.4rem, 3vw, 2.4rem) 0 0;
+  color: var(--color-beam);
+  font-family: var(--font-display);
+  font-size: clamp(0.58rem, 0.9vw, 0.72rem);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 20px rgb(0 0 0 / 0.9);
+  opacity: 0;
+}
+
+.arrival__blurb {
+  max-width: 34ch;
+  margin: 0.85rem 0 0;
+  color: rgb(241 234 234 / 0.74);
+  font-size: clamp(0.9rem, 1.1vw, 1.05rem);
+  line-height: 1.6;
+  text-shadow: 0 2px 22px rgb(0 0 0 / 0.9);
+  opacity: 0;
+}
+
 .arrival__line {
   display: flex;
   will-change: filter;
@@ -282,6 +334,9 @@ body {
     right: 0;
     left: 0;
     display: flex;
+    /* Column, not row: the eyebrow, name and blurb are siblings here. */
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
   }
 
@@ -291,6 +346,12 @@ body {
   }
 
   .arrival__line--last { margin-left: 0; }
+
+  /* Centred with the name on the portrait crop. */
+  .arrival__eyebrow,
+  .arrival__kicker { justify-content: center; text-align: center; }
+
+  .arrival__blurb { max-width: 30ch; text-align: center; }
 
   .arrival__video { object-position: 56% 50%; }
 

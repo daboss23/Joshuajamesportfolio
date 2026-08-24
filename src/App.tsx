@@ -51,7 +51,7 @@ export default function App() {
                 front and centre.
               </h1>
             </div>
-            <div className="flex flex-col items-center gap-3 px-6">
+            <div className="flex translate-y-16 flex-col items-center gap-3 px-6">
               <ScrollCue />
               <CursorHint />
             </div>
