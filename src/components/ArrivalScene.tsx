@@ -8,13 +8,13 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 /**
  * The arrival.
  *
- * The clip is the same portrait the identity scene ends on, shattered and
- * travelled through: it opens inside the crystal tunnel, he walks back out of
- * the distance around two thirds in, and it lands on a hero framing with him
- * held to the right of frame. The left third is empty for the whole landing,
- * which is the only reason the name can live there — so the name is *thrown*
- * in from that side while he is still walking toward camera, and settles onto
- * the frame at the moment he does.
+ * The scene the corridor hands off to. It opens inside the crystal tunnel he
+ * has just been rushed into, he walks back out of the distance around two
+ * thirds in, and it lands on a hero framing with him held to the right of
+ * frame. The left third is empty for the whole landing, which is the only
+ * reason the name can live there — so the name is *thrown* in from that side
+ * while he is still walking toward camera, and settles onto the frame at the
+ * moment he does.
  *
  * The letters do not arrive as words. Each one starts somewhere else entirely
  * — its own distance, angle and size — JOSHUA falling in from above the frame
@@ -37,9 +37,7 @@ const SCRUB_SRC = "/videos/identity-arrival.mp4";
 /*
  * Same clip, VP9. Only ever reached by a browser that cannot demux the H.264 —
  * Chromium builds shipped without the proprietary decoders, mostly on Linux —
- * which would otherwise sit on the poster frame for the whole scene. The
- * ordering matters: Safari and iOS take the first source they understand, so
- * the mp4 has to lead.
+ * which would otherwise sit on the poster frame for the whole scene.
  */
 const SCRUB_SRC_WEBM = "/videos/identity-arrival.webm";
 const PLAY_SRC = "/videos/identity-arrival-lite.mp4";
@@ -165,8 +163,8 @@ export function ArrivalScene() {
          * The clip is the heaviest asset on the site and this scene is two
          * screens down, so it is fetched once the page itself has finished
          * loading rather than alongside it — no competing with the corridor's
-         * covers and the identity portrait for the bandwidth the viewer needs
-         * first, and nothing at all until the rest of the page is up.
+         * covers for the bandwidth the viewer needs first, and nothing at all
+         * until the rest of the page is up.
          */
         const startLoading = () => {
           video.src = pickSource(video, mode);
@@ -229,9 +227,9 @@ export function ArrivalScene() {
           pinSpacing: true,
           scrub: 0.6,
           anticipatePin: 1,
-          // Third pinned scene on the page, so it refreshes last: the corridor
-          // is 1, the identity reveal 0.
-          refreshPriority: -1,
+          // Second pinned scene on the page, so it refreshes after the
+          // corridor above it, which is 1.
+          refreshPriority: 0,
           // Every scatter distance below is a fraction of the viewport, so
           // they have to be re-measured when the viewport changes.
           invalidateOnRefresh: true,
@@ -331,7 +329,7 @@ export function ArrivalScene() {
           1.32,
         )
         /* A specular sweep across the finished lockup, timed to the last
-           letter landing — the same punctuation the identity reveal uses. */
+           letter landing. */
         .fromTo(
           ".arrival__sheen",
           { xPercent: -140, opacity: 0 },
