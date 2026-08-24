@@ -3,6 +3,7 @@ import { ImageStreamHero } from "./components/ImageStreamHero";
 import { ReelGrid } from "./components/ReelGrid";
 import { ReelLightbox } from "./components/ReelLightbox";
 import { TubesCursor } from "./components/TubesCursor";
+import { StarsBackground } from "./components/ui/stars";
 import { REELS, type Reel } from "./data/reels";
 
 export default function App() {
@@ -19,6 +20,16 @@ export default function App() {
   return (
     <div className="min-h-screen bg-ink">
       <TubesCursor />
+
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-30 h-24 overflow-hidden bg-ink sm:h-28">
+        <StarsBackground
+          speed={50}
+          factor={0.05}
+          starColor="#c6f8ff"
+          transition={{ stiffness: 30, damping: 20 }}
+        />
+        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-b from-transparent to-ink" />
+      </div>
 
       <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-between px-6 py-5 mix-blend-difference sm:px-10">
         <a href="#top" className="text-sm font-semibold tracking-tight text-white">
