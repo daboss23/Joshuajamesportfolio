@@ -43,10 +43,10 @@ Everything — hero corridor, work grid and player — is driven by one array in
 
 ## The arrival scene
 
-The section after the identity reveal (`src/components/ArrivalScene.tsx`) scrubs
-a video with the scroll while JOSHUA and JAMES converge onto the frame from
-scattered starting positions — the clip is under the wheel, not playing on its
-own.
+The section the hero corridor hands off to (`src/components/ArrivalScene.tsx`)
+scrubs a video with the scroll while JOSHUA and JAMES converge onto the frame
+from scattered starting positions — the clip is under the wheel, not playing on
+its own.
 
 Its assets live in `public/videos` and `public/images`:
 
