@@ -3,7 +3,6 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { ImageStreamHero } from "./ImageStreamHero";
-import { ParallaxComponent } from "./ui/parallax-scrolling";
 import type { Reel } from "../data/reels";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -15,14 +14,14 @@ type Props = {
 };
 
 /**
- * The hero and the identity reveal as one continuous scroll stage.
+ * The hero's exit.
  *
- * The handoff is a rush *past* the viewer, not a cross-fade. The corridor is
- * already a perspective tunnel, so the exit that belongs to it is the one it
- * was already implying: accelerate, blow past the camera, and be gone. It
- * scales up and blurs out rather than shrinking away, which reads as travel
- * rather than as a section politely dimming — the previous version faded and
- * receded at the same time and felt like watching a light switch.
+ * The handoff to the scene below is a rush *past* the viewer, not a cross-fade.
+ * The corridor is already a perspective tunnel, so the exit that belongs to it
+ * is the one it was already implying: accelerate, blow past the camera, and be
+ * gone. It scales up and blurs out rather than shrinking away, which reads as
+ * travel rather than as a section politely dimming — the previous version faded
+ * and receded at the same time and felt like watching a light switch.
  *
  * The copy leaves first and faster than the frames. Letting the headline ride
  * the same curve as the tunnel just smears it.
@@ -52,10 +51,10 @@ export function ScrollShowcase({ reels, onSelect, children }: Props) {
           scrub: 0.6,
           anticipatePin: 1,
           /*
-           * React mounts children before parents, so the identity scene's
-           * trigger is created before this one — the reverse of page order.
-           * ScrollTrigger has to recalculate in page order or the pin-spacer
-           * measurements downstream are taken against stale positions.
+           * The arrival scene below creates its trigger independently, and
+           * mount order is not page order. ScrollTrigger has to recalculate in
+           * page order or the pin-spacer measurements downstream are taken
+           * against stale positions.
            */
           refreshPriority: 1,
         },
@@ -94,8 +93,6 @@ export function ScrollShowcase({ reels, onSelect, children }: Props) {
           </div>
         </div>
       </div>
-
-      <ParallaxComponent />
     </div>
   );
 }
