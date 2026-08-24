@@ -37,7 +37,19 @@ export default function App() {
           onSelect={open}
           className="h-[100svh] w-full"
         >
-          <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-24 text-center sm:py-28">
+          <div
+            className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-24 text-center sm:py-28"
+            style={{
+              // --hero-exit runs 0 -> 1 as the hero scrolls away. --hero-pin
+              // gives back the scrolled distance so the copy holds still on
+              // screen and reads as a dolly towards the camera, while the
+              // stream behind it lifts up and out.
+              transform:
+                "translate3d(0, var(--hero-pin, 0px), 0) scale(calc(1 + var(--hero-exit, 0) * 0.55))",
+              opacity: "calc(1 - var(--hero-exit, 0))",
+              willChange: "transform, opacity",
+            }}
+          >
             <div className="px-6">
               <h1 className="text-balance text-4xl font-medium tracking-tight text-white sm:text-6xl">
                 Short-form video,

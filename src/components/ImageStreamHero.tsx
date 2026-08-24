@@ -31,6 +31,11 @@ export function ImageStreamHero({
   const slideRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const progress = useRef(0);
   const paused = useRef(false);
+  const streamRef = useRef<HTMLDivElement>(null);
+  // 0 while the hero fills the viewport, 1 once it has scrolled away.
+  const exit = useRef(0);
+  // Pixels of scroll to give back to the copy so it holds still on screen.
+  const pin = useRef(0);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -41,8 +46,32 @@ export function ImageStreamHero({
     let frame = 0;
     let last = performance.now();
 
+    // How far the hero has scrolled out of view. The exit completes a little
+    // before the section leaves the frame, so nothing is still fading while
+    // the work grid is already on screen.
+    const readScroll = () => {
+      if (reduced.matches) {
+        exit.current = 0;
+        return;
+      }
+      const top = root.getBoundingClientRect().top;
+      const span = root.clientHeight * 0.8;
+      exit.current = Math.min(1, Math.max(0, -top / span));
+      pin.current = exit.current * span;
+    };
+
     const layout = () => {
       const width = root.clientWidth;
+      const e = exit.current;
+
+      // The two layers leave in opposite directions: the stream lifts up and
+      // out, the copy is pushed towards the camera. Both fade as they go.
+      if (streamRef.current) {
+        streamRef.current.style.transform = `translate3d(0, ${-e * 45}vh, 0)`;
+        streamRef.current.style.opacity = String(1 - e);
+      }
+      root.style.setProperty("--hero-exit", String(e));
+      root.style.setProperty("--hero-pin", `${pin.current}px`);
       slideRefs.current.forEach((node, i) => {
         if (!node) return;
         // Even indices ride the left lane, odd the right — so the two wings
@@ -78,6 +107,7 @@ export function ImageStreamHero({
       if (!paused.current && !reduced.matches) {
         progress.current = (progress.current + dt * speed) % 1;
       }
+      readScroll();
       layout();
       frame = requestAnimationFrame(tick);
     };
@@ -102,8 +132,9 @@ export function ImageStreamHero({
       onBlurCapture={() => (paused.current = false)}
     >
       <div
+        ref={streamRef}
         className="pointer-events-none absolute inset-0"
-        style={{ transformStyle: "preserve-3d" }}
+        style={{ transformStyle: "preserve-3d", willChange: "transform, opacity" }}
       >
         <div className="absolute left-1/2 top-1/2 h-0 w-0">
           {reels.map((reel, i) => (
